@@ -16,6 +16,11 @@ namespace WebSocketManager
             return _sockets.FirstOrDefault(p => p.Key == id).Value;
         }
 
+        public ConcurrentDictionary<string, WebSocket> GetAll()
+        {
+            return _sockets;
+        }
+
         public string GetId(WebSocket socket)
         {
             return _sockets.FirstOrDefault(p => p.Value == socket).Key;
