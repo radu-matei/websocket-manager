@@ -1,5 +1,6 @@
 using System;
 using System.Net.WebSockets;
+using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
 
@@ -19,10 +20,15 @@ namespace WebSocketManager
         {
             var socket = _webSocketManager.GetSocketById(socketId);
 
+            return await SendMessageAsync(socket, message);            
+        }
+
+        private async Task<bool> SendMessageAsync(WebSocket socket, string message)
+        {
             if(socket.State != WebSocketState.Open)
                 return false;
-            
-            await socket.SendAsync(buffer: new ArraySegment<byte>(array: new byte[bufferSize], 
+
+            await socket.SendAsync(buffer: new ArraySegment<byte>(array: Utils.GetBytes(message, bufferSize),
                                                                   offset: 0, 
                                                                   count: message.Length),
                                    messageType: WebSocketMessageType.Text,
