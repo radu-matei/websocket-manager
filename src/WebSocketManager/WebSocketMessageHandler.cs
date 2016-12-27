@@ -26,8 +26,9 @@ namespace WebSocketManager
         {
             if(socket.State != WebSocketState.Open)
                 return false;
-
-            await socket.SendAsync(buffer: new ArraySegment<byte>(array: Utils.GetBytes(message, bufferSize),
+            
+            var bytesArray = Utils.GetBytes(message);
+            await socket.SendAsync(buffer: new ArraySegment<byte>(array: bytesArray,
                                                                   offset: 0, 
                                                                   count: message.Length),
                                    messageType: WebSocketMessageType.Text,
@@ -36,16 +37,16 @@ namespace WebSocketManager
             return true;
         }
 
-        public async Task ReceiveMessageAsync(WebSocket socket, Action<WebSocketReceiveResult> messageHandler)
+        public async Task ReceiveMessageAsync(WebSocket socket, Action<WebSocketReceiveResult, byte[]> messageHandler)
         {
-            var buffer = new ArraySegment<byte>(new byte[bufferSize]);
+            var buffer = new byte[bufferSize];
 
             while(socket.State == WebSocketState.Open)
             {
-                var messageResult = await socket.ReceiveAsync(buffer: buffer, 
+                var messageResult = await socket.ReceiveAsync(buffer: new ArraySegment<byte>(buffer), 
                                                               cancellationToken: CancellationToken.None);
 
-                messageHandler(messageResult);
+                messageHandler(messageResult, buffer);
             }
         }
     }
