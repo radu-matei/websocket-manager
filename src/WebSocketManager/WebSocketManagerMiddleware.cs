@@ -31,13 +31,11 @@ namespace WebSocketManager
             _webSocketManager.AddSocket(socket);
 
             var socketId = _webSocketManager.GetId(socket);
-            await _webSocketMessageHandler.SendMessageAsync(socketId: socketId, 
-                                                            message: $"SocketId: {_webSocketManager.GetId(socket)}");
+            await _webSocketMessageHandler.SendMessageToAllAsync(message: $"{_webSocketManager.GetId(socket)} connected");
             
             
             await _webSocketMessageHandler.ReceiveMessageAsync(socket, async (result, buffer) => {
-                await _webSocketMessageHandler.SendMessageAsync(socketId: _webSocketManager.GetId(socket),
-                                                                message: $"{Encoding.UTF8.GetString(buffer, 0, result.Count)}");
+                await _webSocketMessageHandler.SendMessageToAllAsync(message: $"{socketId} said: {Encoding.UTF8.GetString(buffer, 0, result.Count)}");
             });
             
             await _next.Invoke(context);
