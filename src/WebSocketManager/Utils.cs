@@ -1,14 +1,13 @@
 using System;
+using System.Text;
 
 namespace WebSocketManager
 {
     public static class Utils
     {
-        public static byte[] GetBytes(string str, int bufferSize)
+        public static byte[] GetBytes(string message)
         {
-            byte[] bytes = new byte[bufferSize];
-            System.Buffer.BlockCopy(str.ToCharArray(), 0, bytes, 0, bytes.Length);
-            return bytes;
+            return Encoding.ASCII.GetBytes(message);
         }
 
         public static string GetString(byte[] bytes)
