@@ -26,8 +26,9 @@ namespace WebSocketManager
             var socket = await context.WebSockets.AcceptWebSocketAsync();
             _webSocketManager.AddSocket(socket);
 
-            await _webSocketMessageHandler.SendMessageAsync(socketId: "", 
-                                                            message: _webSocketManager.GetId(socket));
+            var socketId = _webSocketManager.GetId(socket);
+            await _webSocketMessageHandler.SendMessageAsync(socketId: socketId, 
+                                                            message: $"SocketId: {_webSocketManager.GetId(socket)}");
 
             await _next.Invoke(context);
         }
