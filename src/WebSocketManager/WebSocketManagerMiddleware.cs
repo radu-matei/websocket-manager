@@ -35,7 +35,8 @@ namespace WebSocketManager
             
             
             await _webSocketMessageHandler.ReceiveMessageAsync(socket, async (result, buffer) => {
-                await _webSocketMessageHandler.SendMessageToAllAsync(message: $"{socketId} said: {Encoding.UTF8.GetString(buffer, 0, result.Count)}");
+                var message = $"{socketId} said: {Encoding.UTF8.GetString(buffer, 0, result.Count)}";
+                await _webSocketMessageHandler.SendMessageToAllAsync(message: message);
             });
             
             await _next.Invoke(context);
