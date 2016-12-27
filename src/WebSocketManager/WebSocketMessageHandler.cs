@@ -16,6 +16,14 @@ namespace WebSocketManager
             _webSocketManager = webSocketManager;
         }
 
+        public async Task SendMessageToAllAsync(string message)
+        {
+            foreach(var pair in _webSocketManager.GetAll())
+            {
+                await SendMessageAsync(pair.Value, message);
+            }
+        }
+
         public async Task<bool> SendMessageAsync(string socketId, string message)
         {
             var socket = _webSocketManager.GetSocketById(socketId);
