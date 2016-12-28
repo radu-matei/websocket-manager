@@ -20,7 +20,8 @@ namespace WebSocketManager
         {
             foreach(var pair in _webSocketManager.GetAll())
             {
-                await SendMessageAsync(pair.Value, message);
+                if(pair.Value.State == WebSocketState.Open)
+                    await SendMessageAsync(pair.Value, message);
             }
         }
 
