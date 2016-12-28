@@ -1,4 +1,7 @@
+using System;
+using System.Net.WebSockets;
 using System.Text;
+using System.Threading;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Http;
 
@@ -24,7 +27,7 @@ namespace WebSocketManager
 
         public async Task Invoke(HttpContext context)
         {
-            if(!context.WebSockets.IsWebSocketRequest ||context.Request.Path != _path)
+            if(!context.WebSockets.IsWebSocketRequest || context.Request.Path != _path)
                 return;
             
             var socket = await context.WebSockets.AcceptWebSocketAsync();
@@ -35,11 +38,20 @@ namespace WebSocketManager
             
             
             await _webSocketMessageHandler.ReceiveMessageAsync(socket, async (result, buffer) => {
-                var message = $"{socketId} said: {Encoding.UTF8.GetString(buffer, 0, result.Count)}";
-                await _webSocketMessageHandler.SendMessageToAllAsync(message: message);
+
+                if(result.MessageType == WebSocketMessageType.Text)
+                {
+                    var message = $"{socketId} said: {Encoding.UTF8.GetString(buffer, 0, result.Count)}";
+                    await _webSocketMessageHandler.SendMessageToAllAsync(message: message);
+                }
+
+                if(result.MessageType == WebSocketMessageType.Close)
+                {
+                    await socket.CloseOutputAsync(WebSocketCloseStatus.NormalClosure, String.Empty, CancellationToken.None);
+                }
             });
             
-            await _next.Invoke(context);
+            //await _next.Invoke(context);
         }
     }
 }
