@@ -3,16 +3,19 @@ using Microsoft.Extensions.DependencyInjection;
 
 using WebSocketManager;
 
-public class Startup
+namespace EchoApp
 {
-    public void Configure(IApplicationBuilder app)
+    public class Startup
     {
-        app.UseStaticFiles();
-        app.UseWebSocketManager("/ws");
-    }
+        public void Configure(IApplicationBuilder app, WebSocketManager.WebSocketManager webSocketManager)
+        {
+            app.UseStaticFiles();
+            app.UseWebSocketManager("/ws", new ChatMessageHandler(webSocketManager));
+        }
 
-    public void ConfigureServices(IServiceCollection services)
-    {
-        services.AddWebSocketManager();
+        public void ConfigureServices(IServiceCollection services)
+        {
+            services.AddWebSocketManager();
+        }
     }
 }
