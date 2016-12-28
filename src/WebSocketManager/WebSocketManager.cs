@@ -25,10 +25,9 @@ namespace WebSocketManager
         {
             return _sockets.FirstOrDefault(p => p.Value == socket).Key;
         }
-        public WebSocketState AddSocket(WebSocket socket)
+        public void AddSocket(WebSocket socket)
         {
             _sockets.TryAdd(CreateConnectionId(), socket);
-            return socket.State;
         }
 
         public async Task RemoveSocket(string id)
