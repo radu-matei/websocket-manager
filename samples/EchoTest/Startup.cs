@@ -7,10 +7,12 @@ namespace EchoApp
 {
     public class Startup
     {
-        public void Configure(IApplicationBuilder app, WebSocketManager.WebSocketManager webSocketManager)
+        public void Configure(IApplicationBuilder app)
         {
+            app.UseWebSocketManager("/ws", new ChatMessageHandler(new WebSocketManager.WebSocketManager()));
+            app.UseWebSocketManager("/test", new TestMessageHandler(new WebSocketManager.WebSocketManager()));
+
             app.UseStaticFiles();
-            app.UseWebSocketManager("/ws", new ChatMessageHandler(webSocketManager));
         }
 
         public void ConfigureServices(IServiceCollection services)
