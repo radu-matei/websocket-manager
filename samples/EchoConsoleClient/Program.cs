@@ -23,7 +23,7 @@ namespace EchoConsoleClient
             var sending = Task.Run(async() => 
             {
                 string line;
-                while((line = Console.ReadLine()) != null)
+                while((line = Console.ReadLine()) != null && line != String.Empty)
                 {
                     var bytes = Encoding.UTF8.GetBytes(line);
                     await client.SendAsync(new ArraySegment<byte>(bytes), WebSocketMessageType.Text, true, CancellationToken.None);
