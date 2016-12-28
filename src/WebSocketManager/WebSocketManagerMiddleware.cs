@@ -23,7 +23,7 @@ namespace WebSocketManager
 
         public async Task Invoke(HttpContext context)
         {
-            if(!context.WebSockets.IsWebSocketRequest || context.Request.Path != _path)
+            if(!context.WebSockets.IsWebSocketRequest)
                 return;
             
             var socket = await context.WebSockets.AcceptWebSocketAsync();
