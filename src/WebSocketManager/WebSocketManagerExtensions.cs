@@ -9,7 +9,6 @@ namespace WebSocketManager
         public static IServiceCollection AddWebSocketManager(this IServiceCollection services)
         {
             services.AddSingleton<WebSocketManager>();
-
             return services;
         }
 
@@ -18,7 +17,9 @@ namespace WebSocketManager
                                                               WebSocketHandler handler)
         {
             app.UseWebSockets();
-            return app.UseMiddleware<WebSocketManagerMiddleware>(path, handler);
+            
+            //return app.UseMiddleware<WebSocketManagerMiddleware>(path, handler);
+            return app.Map(path, (_app) => _app.UseMiddleware<WebSocketManagerMiddleware>(path, handler));
         }
     }
 }
