@@ -8,21 +8,21 @@ namespace WebSocketManager
 {
     public abstract class WebSocketHandler
     {
-        protected ConnectionManager ConnectionManager { get; set; }
+        protected WebSocketConnectionManager WebSocketConnectionManager { get; set; }
 
-        public WebSocketHandler(ConnectionManager connectionManager)
+        public WebSocketHandler(WebSocketConnectionManager webSocketConnectionManager)
         {
-            ConnectionManager = connectionManager;
+            WebSocketConnectionManager = webSocketConnectionManager;
         }
 
         public virtual async Task OnConnected(WebSocket socket)
         {
-            ConnectionManager.AddSocket(socket);
+            WebSocketConnectionManager.AddSocket(socket);
         }
 
         public virtual async Task OnDisconnected(WebSocket socket)
         {
-            await ConnectionManager.RemoveSocket(ConnectionManager.GetId(socket));
+            await WebSocketConnectionManager.RemoveSocket(WebSocketConnectionManager.GetId(socket));
         }
 
         public async Task SendMessageAsync(WebSocket socket, string message)
@@ -40,12 +40,12 @@ namespace WebSocketManager
 
         public async Task SendMessageAsync(string socketId, string message)
         {
-            await SendMessageAsync(ConnectionManager.GetSocketById(socketId), message);
+            await SendMessageAsync(WebSocketConnectionManager.GetSocketById(socketId), message);
         }
 
         public async Task SendMessageToAllAsync(string message)
         {
-            foreach(var pair in ConnectionManager.GetAll())
+            foreach(var pair in WebSocketConnectionManager.GetAll())
             {
                 if(pair.Value.State == WebSocketState.Open)
                     await SendMessageAsync(pair.Value, message);

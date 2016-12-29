@@ -8,7 +8,7 @@ namespace WebSocketManager
     {
         public static IServiceCollection AddWebSocketManager(this IServiceCollection services)
         {
-            services.AddTransient<ConnectionManager>();
+            services.AddTransient<WebSocketConnectionManager>();
             return services;
 
             //TODO - decide if using reflection to detect *MessageHandlers is necessary
