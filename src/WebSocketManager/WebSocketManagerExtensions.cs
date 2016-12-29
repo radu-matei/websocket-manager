@@ -1,3 +1,4 @@
+using System.Reflection;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.DependencyInjection;
@@ -9,10 +10,16 @@ namespace WebSocketManager
         public static IServiceCollection AddWebSocketManager(this IServiceCollection services)
         {
             services.AddTransient<WebSocketConnectionManager>();
-            return services;
 
-            //TODO - decide if using reflection to detect *MessageHandlers is necessary
-            //so you don't have to manually register all message handlers in Startup
+            foreach(var type in Assembly.GetEntryAssembly().ExportedTypes)
+            {
+                if(type.GetTypeInfo().BaseType == typeof(WebSocketHandler))
+                {
+                    services.AddSingleton(type);
+                }
+            }
+
+            return services;
         }
 
         public static IApplicationBuilder UseWebSocketManager(this IApplicationBuilder app, 
