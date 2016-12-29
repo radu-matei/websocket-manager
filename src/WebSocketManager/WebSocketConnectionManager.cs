@@ -7,7 +7,7 @@ using System.Threading.Tasks;
 
 namespace WebSocketManager
 {
-    public class ConnectionManager
+    public class WebSocketConnectionManager
     {
         private ConcurrentDictionary<string, WebSocket> _sockets = new ConcurrentDictionary<string, WebSocket>();
 
