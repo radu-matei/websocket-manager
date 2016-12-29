@@ -19,10 +19,6 @@ namespace ChatApplication
         public void ConfigureServices(IServiceCollection services)
         {
             services.AddWebSocketManager();
-
-            //TODO - decide if using reflection to detect *MessageHandlers is necessary
-            services.AddSingleton<ChatMessageHandler>();
-            services.AddSingleton<TestMessageHandler>();
         }
     }
 }
