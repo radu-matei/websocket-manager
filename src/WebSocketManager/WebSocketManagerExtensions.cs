@@ -24,7 +24,7 @@ namespace WebSocketManager
             app.UseWebSockets();
 
             //return app.UseMiddleware<WebSocketManagerMiddleware>(path, handler);
-            return app.Map(path, (_app) => _app.UseMiddleware<WebSocketManagerMiddleware>(path, handler));
+            return app.Map(path, (_app) => _app.UseMiddleware<WebSocketManagerMiddleware>(handler));
         }
     }
 }
