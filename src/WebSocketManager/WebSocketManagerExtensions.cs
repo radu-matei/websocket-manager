@@ -22,15 +22,10 @@ namespace WebSocketManager
             return services;
         }
 
-        public static IApplicationBuilder UseWebSocketManager(this IApplicationBuilder app, 
+        public static IApplicationBuilder MapWebSocketManager(this IApplicationBuilder app, 
                                                               PathString path,
                                                               WebSocketHandler handler)
         {
-            //TODO - break the addition of WebSockets from mapping middleware to paths
-            //so that app.UseWebSockets() isn't called multiple times
-            app.UseWebSockets();
-
-            //return app.UseMiddleware<WebSocketManagerMiddleware>(path, handler);
             return app.Map(path, (_app) => _app.UseMiddleware<WebSocketManagerMiddleware>(handler));
         }
     }
