@@ -20,6 +20,7 @@ namespace EchoApp
         {
             services.AddWebSocketManager();
 
+            //TODO - decide if using reflection to detect *MessageHandlers is necessary
             services.AddSingleton<ChatMessageHandler>();
             services.AddSingleton<TestMessageHandler>();
         }

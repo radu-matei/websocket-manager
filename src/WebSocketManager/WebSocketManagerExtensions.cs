@@ -10,12 +10,17 @@ namespace WebSocketManager
         {
             services.AddTransient<WebSocketManager>();
             return services;
+
+            //TODO - decide if using reflection to detect *MessageHandlers is necessary
+            //so you don't have to manually register all message handlers in Startup
         }
 
         public static IApplicationBuilder UseWebSocketManager(this IApplicationBuilder app, 
                                                               PathString path,
                                                               WebSocketHandler handler)
         {
+            //TODO - break the addition of WebSockets from mapping middleware to paths
+            //so that app.UseWebSockets() isn't called multiple times
             app.UseWebSockets();
 
             //return app.UseMiddleware<WebSocketManagerMiddleware>(path, handler);
