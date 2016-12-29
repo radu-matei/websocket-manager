@@ -10,8 +10,10 @@ namespace ChatApplication
     {
         public void Configure(IApplicationBuilder app, IServiceProvider serviceProvider)
         {
-            app.UseWebSocketManager("/ws", serviceProvider.GetService<ChatMessageHandler>());
-            app.UseWebSocketManager("/test", serviceProvider.GetService<TestMessageHandler>());
+            app.UseWebSockets();
+
+            app.MapWebSocketManager("/ws", serviceProvider.GetService<ChatMessageHandler>());
+            app.MapWebSocketManager("/test", serviceProvider.GetService<TestMessageHandler>());
 
             app.UseStaticFiles();
         }
