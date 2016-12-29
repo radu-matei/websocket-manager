@@ -9,15 +9,12 @@ namespace WebSocketManager
     public class WebSocketManagerMiddleware
     {
         private readonly RequestDelegate _next;
-        private PathString _path;
         private WebSocketHandler _webSocketHandler { get; set; }
 
         public WebSocketManagerMiddleware(RequestDelegate next, 
-                                          PathString path,
                                           WebSocketHandler webSocketHandler)
         {
             _next = next;
-            _path = path;
             _webSocketHandler = webSocketHandler;
         }
 
