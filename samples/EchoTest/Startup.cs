@@ -1,3 +1,4 @@
+using System;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.Extensions.DependencyInjection;
 
@@ -7,10 +8,10 @@ namespace EchoApp
 {
     public class Startup
     {
-        public void Configure(IApplicationBuilder app)
+        public void Configure(IApplicationBuilder app, IServiceProvider serviceProvider)
         {
-            app.UseWebSocketManager("/ws", new ChatMessageHandler(new WebSocketManager.WebSocketManager()));
-            app.UseWebSocketManager("/test", new TestMessageHandler(new WebSocketManager.WebSocketManager()));
+            app.UseWebSocketManager("/ws", serviceProvider.GetService<ChatMessageHandler>());
+            app.UseWebSocketManager("/test", serviceProvider.GetService<TestMessageHandler>());
 
             app.UseStaticFiles();
         }
@@ -18,6 +19,9 @@ namespace EchoApp
         public void ConfigureServices(IServiceCollection services)
         {
             services.AddWebSocketManager();
+
+            services.AddSingleton<ChatMessageHandler>();
+            services.AddSingleton<TestMessageHandler>();
         }
     }
 }
