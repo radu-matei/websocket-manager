@@ -1,4 +1,3 @@
-using System;
 using System.Net.WebSockets;
 using System.Text;
 using System.Threading.Tasks;
@@ -8,7 +7,7 @@ namespace EchoApp
 {
     public class ChatMessageHandler : WebSocketHandler
     {
-        public ChatMessageHandler(WebSocketManager.WebSocketManager webSocketManager) : base(webSocketManager)
+        public ChatMessageHandler(ConnectionManager connectionManager) : base(connectionManager)
         {
         }
 
@@ -16,13 +15,13 @@ namespace EchoApp
         {
             await base.OnConnected(socket);
 
-            var socketId = WebSocketManager.GetId(socket);
+            var socketId = ConnectionManager.GetId(socket);
             await SendMessageToAllAsync($"{socketId} is now connected");
         }
 
         public override async Task ReceiveAsync(WebSocket socket, WebSocketReceiveResult result, byte[] buffer)
         {
-            var socketId = WebSocketManager.GetId(socket);
+            var socketId = ConnectionManager.GetId(socket);
             var message = $"{socketId} said: {Encoding.UTF8.GetString(buffer, 0, result.Count)}";
 
             await SendMessageToAllAsync(message);
