@@ -4,7 +4,7 @@ using Microsoft.Extensions.DependencyInjection;
 
 using WebSocketManager;
 
-namespace EchoApp
+namespace ChatApplication
 {
     public class Startup
     {

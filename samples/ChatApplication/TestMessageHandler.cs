@@ -3,7 +3,7 @@ using System.Text;
 using System.Threading.Tasks;
 using WebSocketManager;
 
-namespace EchoApp
+namespace ChatApplication
 {
     public class TestMessageHandler : WebSocketHandler
     {

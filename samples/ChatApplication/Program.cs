@@ -1,7 +1,7 @@
 ﻿using System.IO;
 using Microsoft.AspNetCore.Hosting;
 
-namespace EchoApp
+namespace ChatApplication
 {
     public class Program
     {
