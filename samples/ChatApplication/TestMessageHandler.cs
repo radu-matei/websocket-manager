@@ -26,5 +26,13 @@ namespace ChatApplication
 
             await SendMessageToAllAsync(message);
         }
+
+        public override async Task OnDisconnected(WebSocket socket)
+        {
+            var socketId = WebSocketConnectionManager.GetId(socket);
+            
+            await base.OnDisconnected(socket);
+            await SendMessageToAllAsync($"{socketId} disconnected");
+        }
     }
 }
