@@ -34,7 +34,7 @@
 
             socket.onmessage = function(event) {
                 appendItem(list, event.data);
-                console.log(event.data);
+                console.log("Receiving through WebSockets " + event.data);
             };
 
             socket.onerror = function(event) {
@@ -56,7 +56,7 @@
         });
 
         function sendMessage(message) { 
-            console.log("Sending: " + message);
+            console.log("Sending through HTTP to a controller:" + message);
             
             $.ajax({
                 url: "http://" + window.location.host + "/api/messages/sendmessage?message=" + message,
