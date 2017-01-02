@@ -16,7 +16,7 @@ namespace EchoConsoleClient
         private static async Task RunWebSockets()
         {
             var client = new ClientWebSocket();
-            await client.ConnectAsync(new Uri("ws://localhost:5000/ws"), CancellationToken.None);
+            await client.ConnectAsync(new Uri("ws://localhost:5000/test"), CancellationToken.None);
 
             Console.WriteLine("Connected!");
 
