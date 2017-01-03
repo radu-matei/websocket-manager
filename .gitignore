@@ -252,3 +252,5 @@ paket-files/
 *.sln.iml
 
 .vscode/
+
+src/WebSocketManager.Client.TS/app/build/
