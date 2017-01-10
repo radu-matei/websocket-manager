@@ -51,4 +51,12 @@ export class Connection {
                 console.log('Error data: ' + event.error);
             }
     }
+
+    public invoke(methodName: string, ...args: any[]) {
+        let invocationDescriptor = new InvocationDescriptor(methodName, args);
+
+        this.socket.send(JSON.stringify(invocationDescriptor));
+
+        console.log(invocationDescriptor);
+    }
 }
