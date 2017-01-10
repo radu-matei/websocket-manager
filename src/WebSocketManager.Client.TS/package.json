@@ -1,5 +1,5 @@
 {
-  "name": "example-typescript-webpackwebs",
+  "name": "websocket-manager-typescript-client",
   "version": "0.1.0",
   "description": "",
   "main": "dist/WebSocketManager.min.js",
