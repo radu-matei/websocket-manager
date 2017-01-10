@@ -1,0 +1,31 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+	<meta charset="utf-8" />
+	<title>Test Page</title>
+</head>
+
+<body>
+	<h1>This should be mapped to "/test"</h1>
+	<input type=text id="textInput" placeholder="Enter your text" />
+	<button id="sendButton">Send</button>
+
+	<ul id="messages"></ul>
+
+    <script data-main="scripts/main" src="https://rawgit.com/radu-matei/websocket-manager/typescript-client/src/WebSocketManager.Client.TS/dist/WebSocketManager.js"></script>
+
+	<script language="javascript" type="text/javascript">
+          
+            var connection = new WebSocketManager.Connection("ws://localhost:5000/test");
+
+            connection.clientMethods["awesomeClientMethod"] = (param1, param2) => {
+                console.log(param1 + " said: " + param2);
+            };
+
+            connection.start();
+            
+    </script>
+</body>
+
+</html>
