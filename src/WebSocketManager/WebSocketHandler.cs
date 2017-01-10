@@ -4,7 +4,9 @@ using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
 using Newtonsoft.Json;
+using Newtonsoft.Json.Linq;
 using Newtonsoft.Json.Serialization;
+using System.Reflection;
 
 namespace WebSocketManager
 {
@@ -69,7 +71,7 @@ namespace WebSocketManager
             var message = new Message()
             {
                 MessageType = MessageType.ClientMethodInvocation,
-                Data = JsonConvert.SerializeObject(new MethodInvocationDescriptor()
+                Data = JsonConvert.SerializeObject(new InvocationDescriptor()
                 {
                     MethodName = methodName,
                     Arguments = arguments
@@ -119,6 +121,36 @@ namespace WebSocketManager
 
 
         //TODO - decide if exposing the message string is better than exposing the result and buffer
-        public abstract Task ReceiveAsync(WebSocket socket, WebSocketReceiveResult result, byte[] buffer);
+        public async Task ReceiveAsync(WebSocket socket, WebSocketReceiveResult result, byte[] buffer)
+        {
+            var serializedInvocationDescriptor = Encoding.UTF8.GetString(buffer, 0, result.Count);
+            var invocationDescriptor = JsonConvert.DeserializeObject<InvocationDescriptor>(serializedInvocationDescriptor, _jsonSerializerSettings);
+
+            var method = this.GetType().GetMethod(invocationDescriptor.MethodName);
+
+            if(method == null)
+                return;
+            try
+            {
+                method.Invoke(this, invocationDescriptor.Arguments);
+            }
+            catch (TargetParameterCountException e)
+            {
+               await SendMessageAsync(socket, new Message()
+                {
+                   MessageType = MessageType.Text,
+                   Data = $"The {invocationDescriptor.MethodName} method does not take {invocationDescriptor.Arguments.Length} parameters!" 
+                });
+            }
+
+            catch (ArgumentException e)
+            {
+                await SendMessageAsync(socket, new Message()
+                {
+                    MessageType = MessageType.Text,
+                    Data = $"The {invocationDescriptor.MethodName} method takes different arguments!"
+                });
+            }
+        }
     }
 }
