@@ -12,7 +12,7 @@ namespace ChatApplication
         {
             app.UseWebSockets();
 
-            app.MapWebSocketManager("/ws", serviceProvider.GetService<ChatMessageHandler>());
+            //app.MapWebSocketManager("/ws", serviceProvider.GetService<ChatMessageHandler>());
             app.MapWebSocketManager("/test", serviceProvider.GetService<TestMessageHandler>());
 
             app.UseStaticFiles();
