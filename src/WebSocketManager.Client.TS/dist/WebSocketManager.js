@@ -62,7 +62,8 @@ return /******/ (function(modules) { // webpackBootstrap
 /***/ function(module, exports, __webpack_require__) {
 
 	"use strict";
-	var Message_1 = __webpack_require__(2);
+	var InvocationDescriptor_1 = __webpack_require__(2);
+	var Message_1 = __webpack_require__(3);
 	var Connection = (function () {
 	    function Connection(url) {
 	        this.clientMethods = {};
@@ -96,6 +97,15 @@ return /******/ (function(modules) { // webpackBootstrap
 	            console.log('Error data: ' + event.error);
 	        };
 	    };
+	    Connection.prototype.invoke = function (methodName) {
+	        var args = [];
+	        for (var _i = 1; _i < arguments.length; _i++) {
+	            args[_i - 1] = arguments[_i];
+	        }
+	        var invocationDescriptor = new InvocationDescriptor_1.InvocationDescriptor(methodName, args);
+	        this.socket.send(JSON.stringify(invocationDescriptor));
+	        console.log(invocationDescriptor);
+	    };
 	    return Connection;
 	}());
 	exports.Connection = Connection;
@@ -103,6 +113,21 @@ return /******/ (function(modules) { // webpackBootstrap
 
 /***/ },
 /* 2 */
+/***/ function(module, exports) {
+
+	"use strict";
+	var InvocationDescriptor = (function () {
+	    function InvocationDescriptor(methodName, args) {
+	        this.methodName = methodName;
+	        this.arguments = args;
+	    }
+	    return InvocationDescriptor;
+	}());
+	exports.InvocationDescriptor = InvocationDescriptor;
+
+
+/***/ },
+/* 3 */
 /***/ function(module, exports) {
 
 	"use strict";
