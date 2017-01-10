@@ -13,15 +13,29 @@
 
 	<ul id="messages"></ul>
 
-    <script data-main="scripts/main" src="https://rawgit.com/radu-matei/websocket-manager/typescript-client/src/WebSocketManager.Client.TS/dist/WebSocketManager.js"></script>
+    <!--
+	<script data-main="scripts/main" src="https://rawgit.com/radu-matei/websocket-manager/typescript-client/src/WebSocketManager.Client.TS/dist/WebSocketManager.js"></script>
+    -->
+    <script data-main="scripts/main" src="connection.js"></script>
 
 	<script language="javascript" type="text/javascript">
           
             var connection = new WebSocketManager.Connection("ws://localhost:5000/test");
 
-            connection.clientMethods["awesomeClientMethod"] = (param1, param2) => {
-                console.log(param1 + " said: " + param2);
+            connection.clientMethods["receiveMessage"] = (socketId, message) => {
+                console.log(socketId + " said: " + message);
             };
+
+            var list = document.getElementById("messages");
+            var button = document.getElementById("sendButton"); 
+
+            button.addEventListener("click", function() {
+            
+                var input = document.getElementById("textInput");
+                connection.invoke("sendMessage", input.value);
+            
+                input.value = "";
+            });
 
             connection.start();
             
