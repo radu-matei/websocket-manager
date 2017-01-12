@@ -65,21 +65,42 @@ return /******/ (function(modules) { // webpackBootstrap
 	var InvocationDescriptor_1 = __webpack_require__(2);
 	var Message_1 = __webpack_require__(3);
 	var Connection = (function () {
-	    function Connection(url) {
+	    function Connection(url, enableLogging) {
+	        var _this = this;
+	        if (enableLogging === void 0) { enableLogging = false; }
+	        this.enableLogging = false;
 	        this.clientMethods = {};
+	        this.connectionMethods = {};
 	        this.url = url;
+	        this.enableLogging = enableLogging;
+	        this.connectionMethods['onConnected'] = function () {
+	            if (_this.enableLogging) {
+	                console.log('Connected! connectionId: ' + _this.connectionId);
+	            }
+	        };
+	        this.connectionMethods['onDisconnected'] = function () {
+	            if (_this.enableLogging) {
+	                console.log('Connection closed from: ' + _this.url);
+	            }
+	        };
+	        this.connectionMethods['onOpen'] = function (socketOpenedEvent) {
+	            if (_this.enableLogging) {
+	                console.log('WebSockets connection opened!');
+	            }
+	        };
 	    }
 	    Connection.prototype.start = function () {
 	        var _this = this;
 	        this.socket = new WebSocket(this.url);
 	        this.socket.onopen = function (event) {
-	            console.log('Connected!');
+	            _this.connectionMethods['onOpen'].apply(_this, event);
 	        };
 	        this.socket.onmessage = function (event) {
 	            _this.message = JSON.parse(event.data);
-	            console.log(_this.message);
 	            if (_this.message.messageType == Message_1.MessageType.Text) {
-	                console.log('Text message received. Message: ' + _this.message.data);
+	                if (_this.enableLogging) {
+	                    console.log('Text message received. Message: ' + _this.message.data);
+	                }
 	            }
 	            else if (_this.message.messageType == Message_1.MessageType.MethodInvocation) {
 	                var invocationDescriptor = JSON.parse(_this.message.data);
@@ -87,14 +108,16 @@ return /******/ (function(modules) { // webpackBootstrap
 	            }
 	            else if (_this.message.messageType == Message_1.MessageType.ConnectionEvent) {
 	                _this.connectionId = _this.message.data;
-	                console.log('Connected! connectionId: ' + _this.connectionId);
+	                _this.connectionMethods['onConnected'].apply(_this);
 	            }
 	        };
 	        this.socket.onclose = function (event) {
-	            console.log('Connection closed from: ' + _this.url);
+	            _this.connectionMethods['onDisconnected'].apply(_this);
 	        };
 	        this.socket.onerror = function (event) {
-	            console.log('Error data: ' + event.error);
+	            if (_this.enableLogging) {
+	                console.log('Error data: ' + event.error);
+	            }
 	        };
 	    };
 	    Connection.prototype.invoke = function (methodName) {
@@ -103,8 +126,10 @@ return /******/ (function(modules) { // webpackBootstrap
 	            args[_i - 1] = arguments[_i];
 	        }
 	        var invocationDescriptor = new InvocationDescriptor_1.InvocationDescriptor(methodName, args);
+	        if (this.enableLogging) {
+	            console.log(invocationDescriptor);
+	        }
 	        this.socket.send(JSON.stringify(invocationDescriptor));
-	        console.log(invocationDescriptor);
 	    };
 	    return Connection;
 	}());
