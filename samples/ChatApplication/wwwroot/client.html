@@ -19,9 +19,17 @@
 	<script language="javascript" type="text/javascript">
           
             var connection = new WebSocketManager.Connection("ws://localhost:5000/test");
+            connection.enableLogging = true;
 
-            var list = document.getElementById("messages");
-            var button = document.getElementById("sendButton"); 
+            connection.connectionMethods.onConnected = () => {
+                //optional
+                console.log("You are now connected! Connection ID: " + connection.connectionId);
+            }
+
+            connection.connectionMethods.onDisconnected = () => {
+                //optional
+                console.log("Disconnected!");
+            }
 
             connection.clientMethods["receiveMessage"] = (socketId, message) => {
                 var messageText = socketId + " said: " + message;
@@ -32,6 +40,8 @@
 
             connection.start();
 
+            var list = document.getElementById("messages");
+            var button = document.getElementById("sendButton"); 
             button.addEventListener("click", function() {
             
                 var input = document.getElementById("textInput");
