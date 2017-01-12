@@ -14,7 +14,7 @@
 	<ul id="messages"></ul>
 
 
-	<script data-main="scripts/main" src="https://rawgit.com/radu-matei/websocket-manager/typescript-client/src/WebSocketManager.Client.TS/dist/WebSocketManager.js"></script>
+	<script data-main="scripts/main" src="https://rawgit.com/radu-matei/websocket-manager/master/src/WebSocketManager.Client.TS/dist/WebSocketManager.js"></script>
 
 	<script language="javascript" type="text/javascript">
           
@@ -35,7 +35,7 @@
             button.addEventListener("click", function() {
             
                 var input = document.getElementById("textInput");
-                connection.invoke("SendMessage", input.value);
+                connection.invoke("SendMessage", connection.connectionId, input.value);
             
                 input.value = "";
             });
