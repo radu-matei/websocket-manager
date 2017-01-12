@@ -13,30 +13,38 @@
 
 	<ul id="messages"></ul>
 
-    
+
 	<script data-main="scripts/main" src="https://rawgit.com/radu-matei/websocket-manager/typescript-client/src/WebSocketManager.Client.TS/dist/WebSocketManager.js"></script>
 
 	<script language="javascript" type="text/javascript">
           
             var connection = new WebSocketManager.Connection("ws://localhost:5000/test");
 
-            connection.clientMethods["receiveMessage"] = (socketId, message) => {
-                console.log(socketId + " said: " + message);
-            };
-
             var list = document.getElementById("messages");
             var button = document.getElementById("sendButton"); 
+
+            connection.clientMethods["receiveMessage"] = (socketId, message) => {
+                var messageText = socketId + " said: " + message;
+               
+                console.log(messageText);
+                appendItem(list, messageText);
+            };
+
+            connection.start();
 
             button.addEventListener("click", function() {
             
                 var input = document.getElementById("textInput");
-                connection.invoke("sendMessage", input.value);
+                connection.invoke("SendMessage", input.value);
             
                 input.value = "";
             });
-
-            connection.start();
             
+            function appendItem(list, message) {
+                var item = document.createElement("li");
+                item.appendChild(document.createTextNode(message));
+                list.appendChild(item);
+             }
     </script>
 </body>
 
