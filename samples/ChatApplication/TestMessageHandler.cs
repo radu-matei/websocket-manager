@@ -25,9 +25,9 @@ namespace ChatApplication
             await SendMessageToAllAsync(message);
         }
    
-        public async Task SendMessage(string message)
+        public async Task SendMessage(string socketId, string message)
         {
-            await InvokeClientMethodToAllAsync("receiveMessage", message);
+            await InvokeClientMethodToAllAsync("receiveMessage", socketId, message);
         }
 
         public override async Task OnDisconnected(WebSocket socket)
