@@ -16,7 +16,7 @@ namespace MvcSample.Controllers
         [HttpGet]
         public async Task SendMessage([FromQueryAttribute]string message)
         {
-           await _notificationsMessageHandler.SendMessageToAllAsync(message);
+           await _notificationsMessageHandler.InvokeClientMethodToAllAsync("receiveMessage", message);
         }
     }
 }

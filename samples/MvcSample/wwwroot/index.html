@@ -9,6 +9,8 @@
   integrity="sha256-hVVnYaiADRTO2PzUGmuLJr8BLUSjGIZsDYGmIJLv2b8="
   crossorigin="anonymous"></script>
 
+  	<script data-main="scripts/main" src="https://rawgit.com/radu-matei/websocket-manager/master/src/WebSocketManager.Client.TS/dist/WebSocketManager.js"></script>
+
 </head>
 
 <body>
@@ -19,29 +21,17 @@
 	<ul id="messages"></ul>
 
     	<script language="javascript" type="text/javascript">
-        var uri = "ws://" + window.location.host + "/notifications";
 
-        function connect() {
-            socket = new WebSocket(uri);
+        var connection = new WebSocketManager.Connection("ws://localhost:5000/notifications");
 
-            socket.onopen = function(event) {
-                console.log("opened connection to " + uri);
-            };
+        connection.clientMethods["receiveMessage"] = (message) => {
+            var messageText = "Someone said: " + message;
+               
+            console.log(messageText);
+            appendItem(list, messageText);
+        };
 
-            socket.onclose = function(event) {
-                console.log("closed connection from " + uri);
-            };
-
-            socket.onmessage = function(event) {
-                appendItem(list, event.data);
-                console.log("Receiving through WebSockets " + event.data);
-            };
-
-            socket.onerror = function(event) {
-                console.log("error: " + event.data);
-            };
-        }
-        connect();
+            connection.start();
 
         var list = document.getElementById("messages");
         var button = document.getElementById("sendButton"); 
