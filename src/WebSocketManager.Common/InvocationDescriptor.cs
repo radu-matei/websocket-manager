@@ -1,6 +1,6 @@
 using Newtonsoft.Json;
 
-namespace WebSocketManager
+namespace WebSocketManager.Common
 {
     public class InvocationDescriptor
     {
