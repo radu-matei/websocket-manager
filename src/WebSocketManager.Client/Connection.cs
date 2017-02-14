@@ -6,6 +6,8 @@ using System.Threading.Tasks;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Serialization;
 
+using WebSocketManager.Common;
+
 namespace WebSocketManager.Client
 {
     public class Connection
@@ -26,12 +28,41 @@ namespace WebSocketManager.Client
         {
             await _clientWebSocket.ConnectAsync(new Uri(uri), CancellationToken.None);
 
+            await Receive(_clientWebSocket, (message) =>
+            {
+                if (message.MessageType == MessageType.ConnectionEvent)
+                {
+                    this.ConnectionId = message.Data;
+                }
+
+                else if (message.MessageType == MessageType.ClientMethodInvocation)
+                {
+                    var invocationDescriptor = JsonConvert.DeserializeObject<InvocationDescriptor>(message.Data, _jsonSerializerSettings);
+                    
+                }
+            });
+
+        }
+
+        public async Task StopConnectionAsync()
+        {
+            await _clientWebSocket.CloseOutputAsync(WebSocketCloseStatus.NormalClosure, "", CancellationToken.None);
+        }
+
+        private async Task Receive(ClientWebSocket clientWebSocket, Action<Message> handleMessage)
+        {
             var buffer = new byte[1024 * 4];
-            while (true)
+
+            while (_clientWebSocket.State == WebSocketState.Open)
             {
                 var result = await _clientWebSocket.ReceiveAsync(new ArraySegment<byte>(buffer), CancellationToken.None);
+                var serializedMessage = Encoding.UTF8.GetString(buffer, 0, result.Count);
+
                 if (result.MessageType == WebSocketMessageType.Text)
-                    Console.WriteLine(Encoding.UTF8.GetString(buffer, 0, result.Count));
+                {
+                    var message = JsonConvert.DeserializeObject<Message>(serializedMessage);
+                    handleMessage(message);
+                }
 
                 else if (result.MessageType == WebSocketMessageType.Close)
                 {
