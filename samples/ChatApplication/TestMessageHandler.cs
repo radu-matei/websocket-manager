@@ -1,6 +1,7 @@
 using System.Net.WebSockets;
 using System.Threading.Tasks;
 using WebSocketManager;
+using WebSocketManager.Common;
 
 namespace ChatApplication
 {
