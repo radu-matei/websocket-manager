@@ -36,7 +36,15 @@ namespace WebSocketManager
 
                 else if(result.MessageType == WebSocketMessageType.Close)
                 {
-                    await _webSocketHandler.OnDisconnected(socket);
+                    try
+                    {
+                        await _webSocketHandler.OnDisconnected(socket);
+                    }
+
+                    catch(WebSocketException e)
+                    {
+                    }
+
                     return;
                 }
 
