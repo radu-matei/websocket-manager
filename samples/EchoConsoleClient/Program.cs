@@ -7,6 +7,12 @@ public class Program
     public static void Main(string[] args)
     {
         StartConnectionAsync();
+
+        _connection.On("receiveMessage", (arguments) => 
+        {
+            Console.WriteLine($"{arguments[0]} said: {arguments[1]}");
+        });
+
         Console.ReadLine();
         StopConnectionAsync();
     }
