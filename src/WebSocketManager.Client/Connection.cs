@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Generic;
 using System.Net.WebSockets;
 using System.Text;
 using System.Threading;
@@ -12,12 +13,16 @@ namespace WebSocketManager.Client
 {
     public class Connection
     {
-        private ClientWebSocket _clientWebSocket { get; set; }
         public string ConnectionId { get; set; }
+
+        public delegate void ServerInvokeHandler(params object[] arguments);
+
+        private ClientWebSocket _clientWebSocket { get; set; }
         private JsonSerializerSettings _jsonSerializerSettings = new JsonSerializerSettings()
         {
             ContractResolver = new CamelCasePropertyNamesContractResolver()
         };
+        private Dictionary<string, ServerInvokeHandler> _handlers = new Dictionary<string, ServerInvokeHandler>();
 
         public Connection()
         {
@@ -38,10 +43,21 @@ namespace WebSocketManager.Client
                 else if (message.MessageType == MessageType.ClientMethodInvocation)
                 {
                     var invocationDescriptor = JsonConvert.DeserializeObject<InvocationDescriptor>(message.Data, _jsonSerializerSettings);
-                    
+                    Invoke(invocationDescriptor);
                 }
             });
 
+        }
+
+        public void On(string methodName, ServerInvokeHandler handler)
+        {
+            _handlers.Add(methodName, handler);
+        }
+
+        private void Invoke(InvocationDescriptor invocationDescriptor)
+        {
+            if(_handlers[invocationDescriptor.MethodName] != null)
+                _handlers[invocationDescriptor.MethodName].Invoke(invocationDescriptor.Arguments);
         }
 
         public async Task StopConnectionAsync()
