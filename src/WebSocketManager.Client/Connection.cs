@@ -15,14 +15,12 @@ namespace WebSocketManager.Client
     {
         public string ConnectionId { get; set; }
 
-        public delegate void ServerInvokeHandler(params object[] arguments);
-
         private ClientWebSocket _clientWebSocket { get; set; }
         private JsonSerializerSettings _jsonSerializerSettings = new JsonSerializerSettings()
         {
             ContractResolver = new CamelCasePropertyNamesContractResolver()
         };
-        private Dictionary<string, ServerInvokeHandler> _handlers = new Dictionary<string, ServerInvokeHandler>();
+        private Dictionary<string, InvocationHandler> _handlers = new Dictionary<string, InvocationHandler>();
 
         public Connection()
         {
@@ -49,15 +47,17 @@ namespace WebSocketManager.Client
 
         }
 
-        public void On(string methodName, ServerInvokeHandler handler)
+        public void On(string methodName, Action<object[]> handler)
         {
-            _handlers.Add(methodName, handler);
+            var invocationHandler = new InvocationHandler(handler, new Type[]{});
+            _handlers.Add(methodName, invocationHandler);
         }
 
         private void Invoke(InvocationDescriptor invocationDescriptor)
         {
-            if(_handlers[invocationDescriptor.MethodName] != null)
-                _handlers[invocationDescriptor.MethodName].Invoke(invocationDescriptor.Arguments);
+            var invocationHandler = _handlers[invocationDescriptor.MethodName];
+            if(invocationHandler != null)
+                invocationHandler.Handler(invocationDescriptor.Arguments);
         }
 
         public async Task StopConnectionAsync()
@@ -86,6 +86,18 @@ namespace WebSocketManager.Client
                     break;
                 }
             }
+        }
+    }
+
+    public class InvocationHandler
+    {
+        public Action<object[]> Handler { get; set; }
+        public Type[] ParameterTypes { get; set; }
+
+        public InvocationHandler(Action<object[]> handler, Type[] parameterTypes)
+        {
+            Handler = handler;
+            ParameterTypes = parameterTypes;
         }
     }
 }
