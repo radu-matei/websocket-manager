@@ -20,7 +20,7 @@ public class Program
     public static async Task StartConnectionAsync()
     {
         _connection = new Connection();
-        await _connection.StartConnectionAsync("ws://localhost:5000/chat");
+        await _connection.StartConnectionAsync("ws://localhost:5000/test");
     }
 
     public static async Task StopConnectionAsync()
