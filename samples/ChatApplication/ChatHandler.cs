@@ -5,9 +5,9 @@ using WebSocketManager.Common;
 
 namespace ChatApplication
 {
-    public class TestMessageHandler : WebSocketHandler
+    public class ChatHandler : WebSocketHandler
     {
-        public TestMessageHandler(WebSocketConnectionManager webSocketConnectionManager) : base(webSocketConnectionManager)
+        public ChatHandler(WebSocketConnectionManager webSocketConnectionManager) : base(webSocketConnectionManager)
         {
         }
 
