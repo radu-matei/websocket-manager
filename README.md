@@ -12,7 +12,7 @@ Why wouldn't I use SignalR for this?
 
 First of all, SignalR for Asp .Net Core is still in its very incipient stages. A preview is expected mid-2017, while a release near the end of 2017, so most probably it will be available for Asp .Net Core 2.0. 
 
-> The preview and release information were taken from [this talk by Damien Edwards and David Fowler, the guys in charge of Asp .Net Core](https://vimeo.com/204078084).
+> The preview and release information were taken from [this talk by Damian Edwards and David Fowler, the guys in charge of Asp .Net Core](https://vimeo.com/204078084).
 
 What is this library's connection to SignalR?
 ----------------------------------------------
