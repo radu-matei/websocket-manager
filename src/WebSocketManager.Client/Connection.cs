@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Net.WebSockets;
 using System.Text;
 using System.Threading;
@@ -49,14 +50,14 @@ namespace WebSocketManager.Client
 
         public void On(string methodName, Action<object[]> handler)
         {
-            var invocationHandler = new InvocationHandler(handler, new Type[]{});
+            var invocationHandler = new InvocationHandler(handler, new Type[] { });
             _handlers.Add(methodName, invocationHandler);
         }
 
         private void Invoke(InvocationDescriptor invocationDescriptor)
         {
             var invocationHandler = _handlers[invocationDescriptor.MethodName];
-            if(invocationHandler != null)
+            if (invocationHandler != null)
                 invocationHandler.Handler(invocationDescriptor.Arguments);
         }
 
@@ -67,12 +68,29 @@ namespace WebSocketManager.Client
 
         private async Task Receive(ClientWebSocket clientWebSocket, Action<Message> handleMessage)
         {
-            var buffer = new byte[1024 * 4];
 
             while (_clientWebSocket.State == WebSocketState.Open)
             {
-                var result = await _clientWebSocket.ReceiveAsync(new ArraySegment<byte>(buffer), CancellationToken.None);
-                var serializedMessage = Encoding.UTF8.GetString(buffer, 0, result.Count);
+                ArraySegment<Byte> buffer = new ArraySegment<byte>(new Byte[1024*4]);
+                string serializedMessage = null;
+                WebSocketReceiveResult result = null;
+                using (var ms = new MemoryStream())
+                {
+                    do
+                    {
+                        result = await clientWebSocket.ReceiveAsync(buffer, CancellationToken.None);
+                        ms.Write(buffer.Array, buffer.Offset, result.Count);
+                    }
+                    while (!result.EndOfMessage);
+
+                    ms.Seek(0, SeekOrigin.Begin);
+
+                    using (var reader = new StreamReader(ms, Encoding.UTF8))
+                    {
+                        serializedMessage = await reader.ReadToEndAsync();
+                    }
+
+                }
 
                 if (result.MessageType == WebSocketMessageType.Text)
                 {

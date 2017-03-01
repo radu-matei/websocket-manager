@@ -91,9 +91,8 @@ namespace WebSocketManager
             }
         }
 
-        public async Task ReceiveAsync(WebSocket socket, WebSocketReceiveResult result, byte[] buffer)
+        public async Task ReceiveAsync(WebSocket socket, WebSocketReceiveResult result, string serializedInvocationDescriptor)
         {
-            var serializedInvocationDescriptor = Encoding.UTF8.GetString(buffer, 0, result.Count);
             var invocationDescriptor = JsonConvert.DeserializeObject<InvocationDescriptor>(serializedInvocationDescriptor);
 
             var method = this.GetType().GetMethod(invocationDescriptor.MethodName);
