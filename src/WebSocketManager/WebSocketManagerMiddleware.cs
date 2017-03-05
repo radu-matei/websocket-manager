@@ -1,4 +1,4 @@
-using System;
+﻿using System;
 using System.Net.WebSockets;
 using System.Threading;
 using System.Threading.Tasks;
@@ -11,7 +11,7 @@ namespace WebSocketManager
         private readonly RequestDelegate _next;
         private WebSocketHandler _webSocketHandler { get; set; }
 
-        public WebSocketManagerMiddleware(RequestDelegate next, 
+        public WebSocketManagerMiddleware(RequestDelegate next,
                                           WebSocketHandler webSocketHandler)
         {
             _next = next;
@@ -20,28 +20,28 @@ namespace WebSocketManager
 
         public async Task Invoke(HttpContext context)
         {
-            if(!context.WebSockets.IsWebSocketRequest)
+            if (!context.WebSockets.IsWebSocketRequest)
                 return;
-            
+
             var socket = await context.WebSockets.AcceptWebSocketAsync();
             await _webSocketHandler.OnConnected(socket);
-            
-            await Receive(socket, async(result, buffer) =>
+
+            await Receive(socket, async (result, buffer) =>
             {
-                if(result.MessageType == WebSocketMessageType.Text)
+                if (result.MessageType == WebSocketMessageType.Text)
                 {
                     await _webSocketHandler.ReceiveAsync(socket, result, buffer);
                     return;
                 }
 
-                else if(result.MessageType == WebSocketMessageType.Close)
+                else if (result.MessageType == WebSocketMessageType.Close)
                 {
                     try
                     {
                         await _webSocketHandler.OnDisconnected(socket);
                     }
 
-                    catch(WebSocketException e)
+                    catch (WebSocketException e)
                     {
                     }
 
@@ -49,7 +49,7 @@ namespace WebSocketManager
                 }
 
             });
-            
+
             //TODO - investigate the Kestrel exception thrown when this is the last middleware
             //await _next.Invoke(context);
         }
@@ -58,12 +58,12 @@ namespace WebSocketManager
         {
             var buffer = new byte[1024 * 4];
 
-            while(socket.State == WebSocketState.Open)
+            while (socket.State == WebSocketState.Open)
             {
                 var result = await socket.ReceiveAsync(buffer: new ArraySegment<byte>(buffer),
                                                        cancellationToken: CancellationToken.None);
 
-                handleMessage(result, buffer);                
+                handleMessage(result, buffer);
             }
         }
     }

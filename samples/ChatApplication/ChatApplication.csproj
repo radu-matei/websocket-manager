@@ -1,0 +1,18 @@
+﻿<Project Sdk="Microsoft.NET.Sdk.Web">
+
+  <PropertyGroup>
+    <TargetFramework>netcoreapp1.1</TargetFramework>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <Content Include="wwwroot\client.html" />
+  </ItemGroup>
+  <ItemGroup>
+    <PackageReference Include="Microsoft.AspNetCore" Version="1.1.0" />
+    <PackageReference Include="Microsoft.AspNetCore.StaticFiles" Version="1.1.0" />
+  </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\..\src\WebSocketManager\WebSocketManager.csproj" />
+  </ItemGroup>
+
+</Project>

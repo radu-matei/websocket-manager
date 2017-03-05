@@ -1,5 +1,4 @@
-﻿
-using System.IO;
+﻿using System.IO;
 using Microsoft.AspNetCore.Hosting;
 
 namespace MvcSample

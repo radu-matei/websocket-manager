@@ -1,4 +1,4 @@
-using System;
+﻿using System;
 using System.Collections.Concurrent;
 using System.Linq;
 using System.Net.WebSockets;
@@ -37,8 +37,8 @@ namespace WebSocketManager
             WebSocket socket;
             _sockets.TryRemove(id, out socket);
 
-            await socket.CloseAsync(closeStatus: WebSocketCloseStatus.NormalClosure, 
-                                    statusDescription: "Closed by the WebSocketManager", 
+            await socket.CloseAsync(closeStatus: WebSocketCloseStatus.NormalClosure,
+                                    statusDescription: "Closed by the WebSocketManager",
                                     cancellationToken: CancellationToken.None);
         }
 

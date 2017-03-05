@@ -1,4 +1,4 @@
-using System.Net.WebSockets;
+﻿using System.Net.WebSockets;
 using System.Threading.Tasks;
 using WebSocketManager;
 using WebSocketManager.Common;
@@ -25,7 +25,7 @@ namespace ChatApplication
 
             await SendMessageToAllAsync(message);
         }
-   
+
         public async Task SendMessage(string socketId, string message)
         {
             await InvokeClientMethodToAllAsync("receiveMessage", socketId, message);
@@ -34,7 +34,7 @@ namespace ChatApplication
         public override async Task OnDisconnected(WebSocket socket)
         {
             var socketId = WebSocketConnectionManager.GetId(socket);
-            
+
             await base.OnDisconnected(socket);
 
             var message = new Message()

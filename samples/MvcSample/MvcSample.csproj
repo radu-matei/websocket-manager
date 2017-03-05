@@ -1,0 +1,21 @@
+﻿<Project Sdk="Microsoft.NET.Sdk.Web">
+
+  <PropertyGroup>
+    <TargetFramework>netcoreapp1.1</TargetFramework>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <Content Include="wwwroot\index.html" />
+  </ItemGroup>
+  <ItemGroup>
+    <PackageReference Include="Microsoft.ApplicationInsights.AspNetCore" Version="2.0.0" />
+    <PackageReference Include="Microsoft.AspNetCore" Version="1.1.0" />
+    <PackageReference Include="Microsoft.AspNetCore.Mvc" Version="1.1.0" />
+    <PackageReference Include="Microsoft.AspNetCore.StaticFiles" Version="1.1.0" />
+  </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\..\src\WebSocketManager.Common\WebSocketManager.Common.csproj" />
+    <ProjectReference Include="..\..\src\WebSocketManager\WebSocketManager.csproj" />
+  </ItemGroup>
+
+</Project>
