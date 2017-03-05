@@ -12,7 +12,7 @@ namespace ChatApplication
                 .UseContentRoot(Directory.GetCurrentDirectory())
                 .UseStartup<Startup>()
                 .Build();
-            
+
             host.Run();
         }
     }

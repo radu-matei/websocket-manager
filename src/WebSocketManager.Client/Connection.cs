@@ -1,4 +1,4 @@
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Net.WebSockets;
 using System.Text;
@@ -49,14 +49,14 @@ namespace WebSocketManager.Client
 
         public void On(string methodName, Action<object[]> handler)
         {
-            var invocationHandler = new InvocationHandler(handler, new Type[]{});
+            var invocationHandler = new InvocationHandler(handler, new Type[] { });
             _handlers.Add(methodName, invocationHandler);
         }
 
         private void Invoke(InvocationDescriptor invocationDescriptor)
         {
             var invocationHandler = _handlers[invocationDescriptor.MethodName];
-            if(invocationHandler != null)
+            if (invocationHandler != null)
                 invocationHandler.Handler(invocationDescriptor.Arguments);
         }
 

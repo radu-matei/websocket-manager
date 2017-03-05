@@ -1,4 +1,4 @@
-using WebSocketManager;
+﻿using WebSocketManager;
 
 namespace MvcSample.MessageHandlers
 {
