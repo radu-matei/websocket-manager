@@ -25,14 +25,14 @@ namespace WebSocketManager
             if (!context.WebSockets.IsWebSocketRequest)
                 return;
 
-            var socket = await context.WebSockets.AcceptWebSocketAsync();
-            await _webSocketHandler.OnConnected(socket);
+            var socket = await context.WebSockets.AcceptWebSocketAsync().ConfigureAwait(false);
+            await _webSocketHandler.OnConnected(socket).ConfigureAwait(false);
 
             await Receive(socket, async (result, serializedInvocationDescriptor) =>
             {
                 if (result.MessageType == WebSocketMessageType.Text)
                 {
-                    await _webSocketHandler.ReceiveAsync(socket, result, serializedInvocationDescriptor);
+                    await _webSocketHandler.ReceiveAsync(socket, result, serializedInvocationDescriptor).ConfigureAwait(false);
                     return;
                 }
 
@@ -43,7 +43,7 @@ namespace WebSocketManager
                         await _webSocketHandler.OnDisconnected(socket);
                     }
 
-                    catch (WebSocketException e)
+                    catch (WebSocketException)
                     {
                         throw; //let's not swallow any exception for now
                     }
@@ -68,7 +68,7 @@ namespace WebSocketManager
                 {
                     do
                     {
-                        result = await socket.ReceiveAsync(buffer, CancellationToken.None);
+                        result = await socket.ReceiveAsync(buffer, CancellationToken.None).ConfigureAwait(false);
                         ms.Write(buffer.Array, buffer.Offset, result.Count);
                     }
                     while (!result.EndOfMessage);
@@ -77,7 +77,7 @@ namespace WebSocketManager
 
                     using (var reader = new StreamReader(ms, Encoding.UTF8))
                     {
-                        serializedInvocationDescriptor = await reader.ReadToEndAsync();
+                        serializedInvocationDescriptor = await reader.ReadToEndAsync().ConfigureAwait(false);
                     }
                 }
 
