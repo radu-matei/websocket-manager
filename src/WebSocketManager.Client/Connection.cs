@@ -30,7 +30,7 @@ namespace WebSocketManager.Client
 
         public async Task StartConnectionAsync(string uri)
         {
-            await _clientWebSocket.ConnectAsync(new Uri(uri), CancellationToken.None);
+            await _clientWebSocket.ConnectAsync(new Uri(uri), CancellationToken.None).ConfigureAwait(false);
 
             await Receive(_clientWebSocket, (message) =>
             {
@@ -63,7 +63,7 @@ namespace WebSocketManager.Client
 
         public async Task StopConnectionAsync()
         {
-            await _clientWebSocket.CloseOutputAsync(WebSocketCloseStatus.NormalClosure, "", CancellationToken.None);
+            await _clientWebSocket.CloseOutputAsync(WebSocketCloseStatus.NormalClosure, "", CancellationToken.None).ConfigureAwait(false);
         }
 
         private async Task Receive(ClientWebSocket clientWebSocket, Action<Message> handleMessage)
@@ -71,14 +71,14 @@ namespace WebSocketManager.Client
 
             while (_clientWebSocket.State == WebSocketState.Open)
             {
-                ArraySegment<Byte> buffer = new ArraySegment<byte>(new Byte[1024*4]);
+                ArraySegment<Byte> buffer = new ArraySegment<byte>(new Byte[1024 * 4]);
                 string serializedMessage = null;
                 WebSocketReceiveResult result = null;
                 using (var ms = new MemoryStream())
                 {
                     do
                     {
-                        result = await clientWebSocket.ReceiveAsync(buffer, CancellationToken.None);
+                        result = await clientWebSocket.ReceiveAsync(buffer, CancellationToken.None).ConfigureAwait(false);
                         ms.Write(buffer.Array, buffer.Offset, result.Count);
                     }
                     while (!result.EndOfMessage);
@@ -87,7 +87,7 @@ namespace WebSocketManager.Client
 
                     using (var reader = new StreamReader(ms, Encoding.UTF8))
                     {
-                        serializedMessage = await reader.ReadToEndAsync();
+                        serializedMessage = await reader.ReadToEndAsync().ConfigureAwait(false);
                     }
 
                 }
@@ -100,7 +100,7 @@ namespace WebSocketManager.Client
 
                 else if (result.MessageType == WebSocketMessageType.Close)
                 {
-                    await _clientWebSocket.CloseOutputAsync(WebSocketCloseStatus.NormalClosure, "", CancellationToken.None);
+                    await _clientWebSocket.CloseOutputAsync(WebSocketCloseStatus.NormalClosure, "", CancellationToken.None).ConfigureAwait(false);
                     break;
                 }
             }
