@@ -2,6 +2,8 @@
 
 Travis: [![Build Status](https://travis-ci.org/radu-matei/websocket-manager.svg?branch=master)](https://travis-ci.org/radu-matei/websocket-manager)
 
+NuGet: [![NuGet](https://img.shields.io/nuget/v/WebSocketManager.svg)](https://www.nuget.org/packages/WebSocketManager)
+
 Simple middlware for real-time .NET Core
 ----------------------------------------
 
