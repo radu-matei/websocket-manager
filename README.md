@@ -1,5 +1,7 @@
 # websocket-manager
 
+Travis: [![Build Status](https://travis-ci.org/radu-matei/websocket-manager.svg?branch=master)](https://travis-ci.org/radu-matei/websocket-manager)
+
 Simple middlware for real-time .NET Core
 ----------------------------------------
 
