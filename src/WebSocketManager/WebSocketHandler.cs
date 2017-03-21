@@ -110,7 +110,7 @@ namespace WebSocketManager
             {
                 method.Invoke(this, invocationDescriptor.Arguments);
             }
-            catch (TargetParameterCountException e)
+            catch (TargetParameterCountException)
             {
                 await SendMessageAsync(socket, new Message()
                 {
@@ -119,7 +119,7 @@ namespace WebSocketManager
                 }).ConfigureAwait(false);
             }
 
-            catch (ArgumentException e)
+            catch (ArgumentException)
             {
                 await SendMessageAsync(socket, new Message()
                 {
