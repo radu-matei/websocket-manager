@@ -1,6 +1,6 @@
 language: csharp
 sudo: required
-dist: xenial
+dist: trusty
 mono: none
 dotnet: 1.0.0-preview2-003121
 
@@ -8,7 +8,7 @@ dotnet: 1.0.0-preview2-003121
 addons:
   apt:
     sources:
-    - sourceline: 'deb [arch=amd64] https://apt-mo.trafficmanager.net/repos/dotnet-release/ xenial main'
+    - sourceline: 'deb [arch=amd64] https://apt-mo.trafficmanager.net/repos/dotnet-release/ trusty main'
       key_url: 'https://apt-mo.trafficmanager.net/keys/microsoft.asc'
     packages:
     - dotnet-dev-1.0.1
