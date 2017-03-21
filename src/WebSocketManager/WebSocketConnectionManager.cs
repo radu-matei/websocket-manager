@@ -5,8 +5,6 @@ using System.Net.WebSockets;
 using System.Threading;
 using System.Threading.Tasks;
 
-using WebSocketManager.Common;
-
 namespace WebSocketManager
 {
     public class WebSocketConnectionManager
@@ -39,7 +37,7 @@ namespace WebSocketManager
 
             await socket.CloseAsync(closeStatus: WebSocketCloseStatus.NormalClosure,
                                     statusDescription: "Closed by the WebSocketManager",
-                                    cancellationToken: CancellationToken.None);
+                                    cancellationToken: CancellationToken.None).ConfigureAwait(false);
         }
 
         private string CreateConnectionId()
