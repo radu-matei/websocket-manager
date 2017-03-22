@@ -14,7 +14,10 @@ addons:
     - dotnet-dev-1.0.1
 
 before_script:
-  dotnet restore samples/WebSocketManagerSamples.sln
-
+  - dotnet restore
+  - dotnet restore samples/WebSocketManagerSamples.sln
+  
 script:
-  dotnet build samples/WebSocketManagerSamples.sln
+  - dotnet build
+  - dotnet build samples/WebSocketManagerSamples.sln
+  - dotnet test test/WebSocketManager.Tests/WebSocketManager.Tests.csproj
