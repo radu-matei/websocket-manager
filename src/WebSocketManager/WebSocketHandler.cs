@@ -70,7 +70,7 @@ namespace WebSocketManager
                 {
                     if (e.WebSocketErrorCode == WebSocketError.ConnectionClosedPrematurely)
                     {
-                        await WebSocketConnectionManager.RemoveSocket(pair.Key);
+                        await OnDisconnected(pair.Value);
                     }
                 }
             }
@@ -104,7 +104,7 @@ namespace WebSocketManager
                 {
                     if (e.WebSocketErrorCode == WebSocketError.ConnectionClosedPrematurely)
                     {
-                        await WebSocketConnectionManager.RemoveSocket(pair.Key);
+                        await OnDisconnected(pair.Value);
                     }
                 }
             }
