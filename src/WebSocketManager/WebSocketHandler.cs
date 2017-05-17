@@ -17,6 +17,9 @@ namespace WebSocketManager
 
   public abstract class WebSocketHandler
   {
+    // Method-cache
+    private Dictionary<string, MethodInfo> methods = new Dictionary<string, MethodInfo>();
+
     protected WebSocketConnectionManager WebSocketConnectionManager { get; set; }
     private JsonSerializerSettings _jsonSerializerSettings = new JsonSerializerSettings()
     {
@@ -106,7 +109,8 @@ namespace WebSocketManager
     {
       var invocationDescriptor = JsonConvert.DeserializeObject<InvocationDescriptor>(serializedInvocationDescriptor);
 
-      var method = this.GetType().GetMethod(invocationDescriptor.MethodName);
+      MethodInfo method = GetMethod(invocationDescriptor.MethodName);
+
 
       if (method == null)
       {
@@ -140,5 +144,25 @@ namespace WebSocketManager
         }).ConfigureAwait(false);
       }
     }
+
+    private MethodInfo GetMethod(string methodName)
+    {
+      MethodInfo method = null;
+      if (!methods.TryGetValue(methodName, out method))
+      {
+        // Todo: make sure this method can be invoked
+        method = this.GetType().GetMethod(methodName);
+        lock (methods)
+        {
+          if (method != null && !methods.ContainsKey(methodName))
+          {
+            methods.Add(methodName, method);
+          }
+        }
+
+      }
+      return method;
+    }
+
   }
 }
