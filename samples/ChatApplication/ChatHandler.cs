@@ -24,7 +24,7 @@ namespace ChatApplication
                 Data = $"{socketId} is now connected"
             };
 
-            await SendMessageToAllAsync(message);
+            await SendMessageToAllAsync(message, x => x.Query["age"].Equals(24));
         }
 
         public async Task SendMessage(string socketId, string message)
@@ -43,7 +43,7 @@ namespace ChatApplication
                 MessageType = MessageType.Text,
                 Data = $"{socketId} disconnected"
             };
-            await SendMessageToAllAsync(message);
-        }
+            await SendMessageToAllAsync(message, x => x.Query["age"].Equals(24));
+    }
     }
 }

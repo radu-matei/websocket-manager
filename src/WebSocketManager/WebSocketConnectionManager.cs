@@ -24,9 +24,9 @@ namespace WebSocketManager
       return _sockets;
     }
 
-    public List<WebSocketConnection> Connections()
+    public IEnumerable<WebSocketConnection> Connections()
     {
-      return _sockets.Values.Where(x => x.Socket.State == WebSocketState.Open).ToList();
+      return _sockets.Values.Where(x => x.Socket.State == WebSocketState.Open);
     }
 
     public string GetId(WebSocket socket)

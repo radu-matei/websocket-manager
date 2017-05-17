@@ -9,6 +9,7 @@ using Newtonsoft.Json.Serialization;
 using WebSocketManager.Common;
 using System.Linq;
 using Microsoft.AspNetCore.Http;
+using System.Collections;
 
 namespace WebSocketManager
 {
@@ -57,9 +58,14 @@ namespace WebSocketManager
     }
 
 
-    public async Task SendMessageToAllAsync(Message message)
+    public async Task SendMessageToAllAsync(Message message, Func<WebSocketConnection, bool> filter = null)
     {
-      foreach (var connection in WebSocketConnectionManager.Connections())
+      var connections = WebSocketConnectionManager.Connections();
+      if (filter != null)
+      {
+        connections = connections.Where(x => filter(x));
+      }
+      foreach (var connection in connections)
       {
         await SendMessageAsync(connection.Socket, message).ConfigureAwait(false);
       }
@@ -82,6 +88,12 @@ namespace WebSocketManager
           Arguments = arguments
         }, _jsonSerializerSettings)
       };
+    }
+
+    public async Task InvokeClientMethodToAllAsync(string methodName, Func<WebSocketConnection, bool> filter, params object[] arguments)
+    {
+      Message message = GetInvocationMessage(methodName, arguments);
+      await SendMessageToAllAsync(message, filter);
     }
 
     public async Task InvokeClientMethodToAllAsync(string methodName, params object[] arguments)
