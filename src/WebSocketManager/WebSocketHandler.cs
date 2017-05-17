@@ -10,6 +10,7 @@ using WebSocketManager.Common;
 using System.Linq;
 using Microsoft.AspNetCore.Http;
 using System.Collections;
+using System.Collections.Generic;
 
 namespace WebSocketManager
 {
@@ -65,10 +66,9 @@ namespace WebSocketManager
       {
         connections = connections.Where(x => filter(x));
       }
-      foreach (var connection in connections)
-      {
-        await SendMessageAsync(connection.Socket, message).ConfigureAwait(false);
-      }
+      // Get all connections to send to and send all at once, without blocking
+      IEnumerable<Task> allTasks = connections.Select(x => SendMessageAsync(x.Socket, message));
+      await Task.WhenAll(allTasks).ConfigureAwait(false);
     }
 
     public async Task InvokeClientMethodAsync(string socketId, string methodName, object[] arguments)
