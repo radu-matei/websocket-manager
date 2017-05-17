@@ -23,6 +23,7 @@ namespace WebSocketManager
     {
       if (!context.WebSockets.IsWebSocketRequest)
       {
+        context.Response.StatusCode = 400;
         return;
       }
 
@@ -59,13 +60,15 @@ namespace WebSocketManager
 
     private async Task Receive(WebSocket socket, Action<WebSocketReceiveResult, string> handleMessage)
     {
-      while (socket.State == WebSocketState.Open)
+      ArraySegment<Byte> buffer = new ArraySegment<byte>(new Byte[1024 * 4]);
+      using (var ms = new MemoryStream())
       {
-        ArraySegment<Byte> buffer = new ArraySegment<byte>(new Byte[1024 * 4]);
-        string serializedInvocationDescriptor = null;
-        WebSocketReceiveResult result = null;
-        using (var ms = new MemoryStream())
+        while (socket.State == WebSocketState.Open)
         {
+
+          string serializedInvocationDescriptor = null;
+          WebSocketReceiveResult result = null;
+
           do
           {
             result = await socket.ReceiveAsync(buffer, CancellationToken.None).ConfigureAwait(false);
@@ -73,15 +76,11 @@ namespace WebSocketManager
           }
           while (!result.EndOfMessage);
 
-          ms.Seek(0, SeekOrigin.Begin);
+          serializedInvocationDescriptor = Encoding.UTF8.GetString(ms.ToArray());
+          ms.SetLength(0);
 
-          using (var reader = new StreamReader(ms, Encoding.UTF8))
-          {
-            serializedInvocationDescriptor = await reader.ReadToEndAsync().ConfigureAwait(false);
-          }
+          handleMessage(result, serializedInvocationDescriptor);
         }
-
-        handleMessage(result, serializedInvocationDescriptor);
       }
     }
 
