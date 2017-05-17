@@ -28,7 +28,7 @@ namespace WebSocketManager
 
 
       var socket = await context.WebSockets.AcceptWebSocketAsync().ConfigureAwait(false);
-      await _webSocketHandler.OnConnected(socket).ConfigureAwait(false);
+      await _webSocketHandler.OnConnected(socket, context).ConfigureAwait(false);
 
       await Receive(socket, async (result, serializedInvocationDescriptor) =>
       {

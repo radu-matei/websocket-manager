@@ -8,6 +8,7 @@ using Newtonsoft.Json;
 using Newtonsoft.Json.Serialization;
 using WebSocketManager.Common;
 using System.Linq;
+using Microsoft.AspNetCore.Http;
 
 namespace WebSocketManager
 {
@@ -16,6 +17,7 @@ namespace WebSocketManager
   {
     public string Id;
     public WebSocket Socket;
+    public IQueryCollection Query { get; internal set; }
   }
 
 }

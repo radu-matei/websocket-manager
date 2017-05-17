@@ -1,4 +1,5 @@
-﻿using System;
+﻿using Microsoft.AspNetCore.Http;
+using System;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Linq;
@@ -32,10 +33,11 @@ namespace WebSocketManager
     {
       return _sockets.Values.FirstOrDefault(p => p.Socket == socket).Id;
     }
-    public void AddSocket(WebSocket socket)
+    public void AddSocket(WebSocket socket, HttpContext context)
     {
+
       string id = CreateConnectionId();
-      _sockets.TryAdd(id, new WebSocketConnection { Id = id, Socket = socket });
+      _sockets.TryAdd(id, new WebSocketConnection { Id = id, Socket = socket, Query = context.Request.Query });
     }
 
     public async Task RemoveSocket(string id)

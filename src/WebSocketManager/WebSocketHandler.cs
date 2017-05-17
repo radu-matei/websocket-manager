@@ -8,6 +8,7 @@ using Newtonsoft.Json;
 using Newtonsoft.Json.Serialization;
 using WebSocketManager.Common;
 using System.Linq;
+using Microsoft.AspNetCore.Http;
 
 namespace WebSocketManager
 {
@@ -24,9 +25,9 @@ namespace WebSocketManager
       WebSocketConnectionManager = webSocketConnectionManager;
     }
 
-    public virtual async Task OnConnected(WebSocket socket)
+    public virtual async Task OnConnected(WebSocket socket, HttpContext context)
     {
-      WebSocketConnectionManager.AddSocket(socket);
+      WebSocketConnectionManager.AddSocket(socket, context);
 
       await SendMessageAsync(socket, new Message()
       {

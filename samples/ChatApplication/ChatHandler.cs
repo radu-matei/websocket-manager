@@ -1,4 +1,5 @@
-﻿using System.Net.WebSockets;
+﻿using Microsoft.AspNetCore.Http;
+using System.Net.WebSockets;
 using System.Threading.Tasks;
 using WebSocketManager;
 using WebSocketManager.Common;
@@ -11,9 +12,9 @@ namespace ChatApplication
         {
         }
 
-        public override async Task OnConnected(WebSocket socket)
+        public override async Task OnConnected(WebSocket socket, HttpContext context)
         {
-            await base.OnConnected(socket);
+            await base.OnConnected(socket, context);
 
             var socketId = WebSocketConnectionManager.GetId(socket);
 
