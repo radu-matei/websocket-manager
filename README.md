@@ -35,5 +35,5 @@ While it is still in development, you can see some examples of usage in the [`sa
 Contribute to **websocket-manager**
 -----------------------------------
 
-Contributions in any form are welcome! Submit issues with bugs and reccomandations! 
+Contributions in any form are welcome! Submit issues with bugs and recommendations! 
 **Pull Requests** are highly appreciated!
