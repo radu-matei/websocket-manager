@@ -44,9 +44,10 @@ namespace WebSocketManager
                 return;
 
             var serializedMessage = JsonConvert.SerializeObject(message, _jsonSerializerSettings);
-            await socket.SendAsync(buffer: new ArraySegment<byte>(array: Encoding.ASCII.GetBytes(serializedMessage),
+            var encodedMessage = Encoding.UTF8.GetBytes(serializedMessage);
+            await socket.SendAsync(buffer: new ArraySegment<byte>(array: encodedMessage,
                                                                   offset: 0,
-                                                                  count: serializedMessage.Length),
+                                                                  count: encodedMessage.Length),
                                    messageType: WebSocketMessageType.Text,
                                    endOfMessage: true,
                                    cancellationToken: CancellationToken.None).ConfigureAwait(false);
