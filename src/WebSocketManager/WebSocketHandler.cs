@@ -115,6 +115,18 @@ namespace WebSocketManager
             }
         }
 
+        public async Task InvokeClientMethodToGroupAsync(string groupID, string methodName, params object[] arguments)
+        {
+            var sockets = WebSocketConnectionManager.GetAllFromGroup(groupID);
+            if (sockets != null)
+            {
+                foreach (var id in sockets)
+                {
+                    await InvokeClientMethodAsync(id, methodName, arguments);
+                }
+            }
+        }
+
         public async Task InvokeClientMethodToGroupAsync(string groupID, string methodName, string except, params object[] arguments)
         {
             var sockets = WebSocketConnectionManager.GetAllFromGroup(groupID);
