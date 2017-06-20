@@ -37,9 +37,36 @@ namespace WebSocketManager
         {
             return _sockets.FirstOrDefault(p => p.Value == socket).Key;
         }
+
         public void AddSocket(WebSocket socket)
         {
             _sockets.TryAdd(CreateConnectionId(), socket);
+        }
+
+        public void AddToGroup(string socketID, string groupID)
+        {
+            if (_groups.ContainsKey(groupID))
+            {
+                var list = _groups[groupID];
+                list.Add(socketID);
+                _groups[groupID] = list;
+
+                return;
+            }
+
+            _groups.TryAdd(groupID, new List<string> { socketID });
+        }
+
+        public void RemoveFromGroup(string socketID, string groupID)
+        {
+            if (_groups.ContainsKey(groupID))
+            {
+                var list = _groups[groupID];
+                list.Remove(socketID);
+                _groups[groupID] = list;
+
+                return;
+            }
         }
 
         public async Task RemoveSocket(string id)
