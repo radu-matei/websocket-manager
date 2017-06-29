@@ -9,13 +9,13 @@ namespace WebSocketManager
   {
     public static IServiceCollection AddWebSocketManager(this IServiceCollection services)
     {
-      services.AddTransient<WebSocketConnectionManager>();
+      services.AddSingleton<WebSocketConnectionManager>();
 
       foreach (var type in Assembly.GetEntryAssembly().ExportedTypes)
       {
         if (type.GetTypeInfo().BaseType == typeof(WebSocketHandler))
         {
-          services.AddSingleton(type);
+          services.AddScoped(type);
         }
       }
 
