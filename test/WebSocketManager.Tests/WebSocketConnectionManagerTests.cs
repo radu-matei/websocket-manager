@@ -1,3 +1,4 @@
+using Microsoft.AspNetCore.Http;
 using System.Threading.Tasks;
 using WebSocketManager.Tests.Helpers;
 using Xunit;
@@ -30,8 +31,8 @@ namespace WebSocketManager.Tests
             public void WhenExistingId_ShouldReturnSocket()
             {
                 var socket = new FakeSocket();
-
-                _manager.AddSocket(socket);
+                var context = new FakeContext();
+                _manager.AddSocket(socket, context);
                 var id = _manager.GetId(socket);
 
                 Assert.Same(socket, _manager.GetSocketById(id));
@@ -49,7 +50,7 @@ namespace WebSocketManager.Tests
             [Fact]
             public void WhenOneSocket_ShouldReturnOne()
             {
-                _manager.AddSocket(new FakeSocket());
+                _manager.AddSocket(new FakeSocket(), new FakeContext());
 
                 Assert.Equal(1, _manager.GetAll().Count);
             }
@@ -77,7 +78,7 @@ namespace WebSocketManager.Tests
             public void WhenTrackedInstance_ShouldReturnId()
             {
                 var socket = new FakeSocket();
-                _manager.AddSocket(socket);
+                _manager.AddSocket(socket, new FakeContext());
 
                 var id = _manager.GetId(socket);
 
@@ -90,7 +91,7 @@ namespace WebSocketManager.Tests
             [Fact(Skip = "At the moment the implementation allows adding null references")]
             public void WhenNull_ShouldNotNotContainSocket()
             {
-                _manager.AddSocket(null);
+                _manager.AddSocket(null, null);
 
                 Assert.Equal(0, _manager.GetAll().Count);
             }
@@ -98,7 +99,7 @@ namespace WebSocketManager.Tests
             [Fact]
             public void WhenInstance_ShouldContainSocket()
             {
-                _manager.AddSocket(new FakeSocket());
+                _manager.AddSocket(new FakeSocket(), new FakeContext());
 
                 Assert.Equal(1, _manager.GetAll().Count);
             }

@@ -18,7 +18,7 @@
 
     <script language="javascript" type="text/javascript">
 
-            var connection = new WebSocketManager.Connection("ws://" + location.host + "/chat");
+            var connection = new WebSocketManager.Connection("ws://" + location.host + "/chat?name=SomeUser&age=24");
             connection.enableLogging = true;
 
             connection.connectionMethods.onConnected = () => {
