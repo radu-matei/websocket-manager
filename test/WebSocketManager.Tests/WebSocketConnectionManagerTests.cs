@@ -143,7 +143,6 @@ namespace WebSocketManager.Tests
             private string GroupName = "FakeGroup";
 
             [Theory(Skip = "Currently it doesn't check for non existing sockets")]
-            [Fact]
             public void WhenRemoveNonExisting_ShouldNotThrowException()
             {
                 _manager.RemoveFromGroup("", GroupName);
