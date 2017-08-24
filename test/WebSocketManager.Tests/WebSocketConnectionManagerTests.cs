@@ -55,6 +55,28 @@ namespace WebSocketManager.Tests
             }
         }
 
+        public class GetAllFromGroup : WebSocketConnectionManagerTests
+        {
+            private string GroupName = "FakeGroup";
+
+            [Fact]
+            public void WhenNonExistingGroup_ShouldReturnNull()
+            {
+                Assert.Null(_manager.GetAllFromGroup(GroupName));
+            }
+
+            [Fact]
+            public void WhenOneSocketInGroup_ShouldReturnOne()
+            {
+                var socket = new FakeSocket();
+                _manager.AddSocket(socket);
+                var socketID = _manager.GetId(socket);
+                _manager.AddToGroup(socketID, GroupName);
+
+                Assert.Equal(1, _manager.GetAllFromGroup(GroupName).Count);
+            }
+        }
+
         public class GetId : WebSocketConnectionManagerTests
         {
             [Fact]
@@ -113,6 +135,17 @@ namespace WebSocketManager.Tests
             public async Task WhenNonExistentId_ShouldNotThrowException(string id)
             {
                 await _manager.RemoveSocket(id);
+            }
+        }
+
+        public class RemoveFromGroup : WebSocketConnectionManagerTests
+        {
+            private string GroupName = "FakeGroup";
+
+            [Theory(Skip = "Currently it doesn't check for non existing sockets")]
+            public void WhenRemoveNonExisting_ShouldNotThrowException()
+            {
+                _manager.RemoveFromGroup("", GroupName);
             }
         }
     }

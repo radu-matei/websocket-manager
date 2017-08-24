@@ -90,6 +90,56 @@ namespace WebSocketManager
             }
         }
 
+        public async Task SendMessageToGroupAsync(string groupID, Message message)
+        {
+            var sockets = WebSocketConnectionManager.GetAllFromGroup(groupID);
+            if (sockets != null)
+            {
+                foreach (var socket in sockets)
+                {
+                    await SendMessageAsync(socket, message);
+                }
+            }
+        }
+
+        public async Task SendMessageToGroupAsync(string groupID, Message message, string except)
+        {
+            var sockets = WebSocketConnectionManager.GetAllFromGroup(groupID);
+            if (sockets != null)
+            {
+                foreach (var id in sockets)
+                {
+                    if(id != except)
+                        await SendMessageAsync(id, message);
+                }
+            }
+        }
+
+        public async Task InvokeClientMethodToGroupAsync(string groupID, string methodName, params object[] arguments)
+        {
+            var sockets = WebSocketConnectionManager.GetAllFromGroup(groupID);
+            if (sockets != null)
+            {
+                foreach (var id in sockets)
+                {
+                    await InvokeClientMethodAsync(id, methodName, arguments);
+                }
+            }
+        }
+
+        public async Task InvokeClientMethodToGroupAsync(string groupID, string methodName, string except, params object[] arguments)
+        {
+            var sockets = WebSocketConnectionManager.GetAllFromGroup(groupID);
+            if(sockets != null)
+            {
+                foreach (var id in sockets)
+                {
+                    if(id != except)
+                        await InvokeClientMethodAsync(id, methodName, arguments);
+                }
+            }
+        }
+
         public async Task ReceiveAsync(WebSocket socket, WebSocketReceiveResult result, string serializedInvocationDescriptor)
         {
             var invocationDescriptor = JsonConvert.DeserializeObject<InvocationDescriptor>(serializedInvocationDescriptor);
