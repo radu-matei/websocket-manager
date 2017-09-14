@@ -5,15 +5,15 @@ VisualStudioVersion = 15.0.26206.0
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ChatApplication", "ChatApplication\ChatApplication.csproj", "{C64533FC-4066-438D-9297-BDF1150B3F9A}"
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "EchoConsoleClient", "EchoConsoleClient\EchoConsoleClient.csproj", "{DDE2DC69-2CD5-4C4F-98D3-3609942A6E63}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "EchoConsoleClient", "EchoConsoleClient\EchoConsoleClient.csproj", "{DDE2DC69-2CD5-4C4F-98D3-3609942A6E63}"
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "MvcSample", "MvcSample\MvcSample.csproj", "{89A1D156-DE58-4C80-B8C3-B1B389764D95}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "MvcSample", "MvcSample\MvcSample.csproj", "{89A1D156-DE58-4C80-B8C3-B1B389764D95}"
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "WebSocketManager", "..\src\WebSocketManager\WebSocketManager.csproj", "{9D92BAD3-058A-452C-8701-C0E7C3AE268E}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "WebSocketManager", "..\src\WebSocketManager\WebSocketManager.csproj", "{9D92BAD3-058A-452C-8701-C0E7C3AE268E}"
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "WebSocketManager.Common", "..\src\WebSocketManager.Common\WebSocketManager.Common.csproj", "{2A5BA455-1A0F-4B36-998D-0FBDBCF69137}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "WebSocketManager.Common", "..\src\WebSocketManager.Common\WebSocketManager.Common.csproj", "{2A5BA455-1A0F-4B36-998D-0FBDBCF69137}"
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "WebSocketManager.Client", "..\src\WebSocketManager.Client\WebSocketManager.Client.csproj", "{818BF6BF-9F97-47E5-8AFC-77E3EDA2A5C9}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "WebSocketManager.Client", "..\src\WebSocketManager.Client\WebSocketManager.Client.csproj", "{818BF6BF-9F97-47E5-8AFC-77E3EDA2A5C9}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -100,5 +100,8 @@ Global
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(MonoDevelopProperties) = preSolution
+		version = 0.2
 	EndGlobalSection
 EndGlobal
