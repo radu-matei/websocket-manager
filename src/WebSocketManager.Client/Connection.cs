@@ -53,8 +53,17 @@ namespace WebSocketManager.Client
             var invocationHandler = new InvocationHandler(handler, new Type[] { });
             _handlers.Add(methodName, invocationHandler);
         }
-
-        private void Invoke(InvocationDescriptor invocationDescriptor)
+    /// <summary>
+    /// Send a message to the server
+    /// </summary>
+    /// <param name="invocationDescriptor">Example usage: set the MethodName to SendMessage and set the arguments to the connectionID with a text message</param>
+    /// <returns></returns>
+    public async Task SendAsync(InvocationDescriptor invocationDescriptor)
+    {
+      var bytes = Encoding.UTF8.GetBytes(JsonConvert.SerializeObject(invocationDescriptor));
+      await _clientWebSocket.SendAsync(new ArraySegment<byte>(bytes), WebSocketMessageType.Text, true, CancellationToken.None);
+    }
+    private void Invoke(InvocationDescriptor invocationDescriptor)
         {
             var invocationHandler = _handlers[invocationDescriptor.MethodName];
             if (invocationHandler != null)
