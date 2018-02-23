@@ -47,9 +47,7 @@ namespace WebSocketManager
         {
             if (_groups.ContainsKey(groupID))
             {
-                var list = _groups[groupID];
-                list.Add(socketID);
-                _groups[groupID] = list;
+                _groups[groupID].Add(socketID);
 
                 return;
             }
@@ -61,11 +59,7 @@ namespace WebSocketManager
         {
             if (_groups.ContainsKey(groupID))
             {
-                var list = _groups[groupID];
-                list.Remove(socketID);
-                _groups[groupID] = list;
-
-                return;
+                _groups[groupID].Remove(socketID);
             }
         }
 
