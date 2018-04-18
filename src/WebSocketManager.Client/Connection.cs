@@ -65,6 +65,8 @@ namespace WebSocketManager.Client
     }
     private void Invoke(InvocationDescriptor invocationDescriptor)
         {
+			if (!_handlers.ContainsKey(invocationDescriptor.MethodName))
+                return;
             var invocationHandler = _handlers[invocationDescriptor.MethodName];
             if (invocationHandler != null)
                 invocationHandler.Handler(invocationDescriptor.Arguments);
