@@ -27,11 +27,20 @@ namespace WebSocketManager.Client
 
         public Connection()
         {
-            _clientWebSocket = new ClientWebSocket();
         }
 
         public async Task StartConnectionAsync(string uri)
         {
+            // also check if connection was lost, that's probably why we get called multiple times.
+            if (_clientWebSocket == null || _clientWebSocket.State != WebSocketState.Open)
+            {
+                // create a new web-socket so the next connect call works.
+                _clientWebSocket?.Dispose();
+                _clientWebSocket = new ClientWebSocket();
+            }
+            // don't do anything, we are already connected.
+            else return;
+
             await _clientWebSocket.ConnectAsync(new Uri(uri), CancellationToken.None).ConfigureAwait(false);
 
             await Receive(_clientWebSocket, (message) =>
@@ -113,7 +122,7 @@ namespace WebSocketManager.Client
                 }
             }
         }
-		
+
         public async Task SendAsync(string method) => await SendAsync(new InvocationDescriptor { MethodName = method, Arguments = new object[] { } });
 
         public async Task SendAsync<T1>(string method, T1 arg1) => await SendAsync(new InvocationDescriptor { MethodName = method, Arguments = new object[] { arg1 } });
