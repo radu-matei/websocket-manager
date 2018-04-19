@@ -27,16 +27,15 @@ namespace WebSocketManager.Client
 
         public Connection()
         {
-            _clientWebSocket = new ClientWebSocket();
         }
 
         public async Task StartConnectionAsync(string uri)
         {
-            // the connection was lost, probably why we got called again.
-            if (_clientWebSocket.State != WebSocketState.Open)
+            // also check if connection was lost, that's probably why we get called multiple times.
+            if (_clientWebSocket == null || _clientWebSocket.State != WebSocketState.Open)
             {
                 // create a new web-socket so the next connect call works.
-                _clientWebSocket.Dispose();
+                _clientWebSocket?.Dispose();
                 _clientWebSocket = new ClientWebSocket();
             }
             // don't do anything, we are already connected.
