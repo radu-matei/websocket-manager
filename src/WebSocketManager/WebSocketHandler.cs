@@ -42,7 +42,7 @@ namespace WebSocketManager
         {
             if (socket.State != WebSocketState.Open)
                 return;
-
+            
             var serializedMessage = JsonConvert.SerializeObject(message, _jsonSerializerSettings);
             var encodedMessage = Encoding.UTF8.GetBytes(serializedMessage);
             await socket.SendAsync(buffer: new ArraySegment<byte>(array: encodedMessage,
@@ -62,8 +62,18 @@ namespace WebSocketManager
         {
             foreach (var pair in WebSocketConnectionManager.GetAll())
             {
-                if (pair.Value.State == WebSocketState.Open)
-                    await SendMessageAsync(pair.Value, message).ConfigureAwait(false);
+                try
+                {
+                    if (pair.Value.State == WebSocketState.Open)
+                        await SendMessageAsync(pair.Value, message).ConfigureAwait(false);
+                }
+                catch (WebSocketException e)
+                {
+                    if (e.WebSocketErrorCode == WebSocketError.ConnectionClosedPrematurely)
+                    {
+                        await OnDisconnected(pair.Value);
+                    }
+                }
             }
         }
 
@@ -86,8 +96,18 @@ namespace WebSocketManager
         {
             foreach (var pair in WebSocketConnectionManager.GetAll())
             {
-                if (pair.Value.State == WebSocketState.Open)
-                    await InvokeClientMethodAsync(pair.Key, methodName, arguments).ConfigureAwait(false);
+                try
+                {
+                    if (pair.Value.State == WebSocketState.Open)
+                        await InvokeClientMethodAsync(pair.Key, methodName, arguments).ConfigureAwait(false);
+                }
+                catch (WebSocketException e)
+                {
+                    if (e.WebSocketErrorCode == WebSocketError.ConnectionClosedPrematurely)
+                    {
+                        await OnDisconnected(pair.Value);
+                    }
+                }
             }
         }
 
