@@ -13,15 +13,22 @@ namespace WebSocketManager
     public abstract class WebSocketHandler
     {
         protected WebSocketConnectionManager WebSocketConnectionManager { get; set; }
+
         private JsonSerializerSettings _jsonSerializerSettings = new JsonSerializerSettings()
         {
             ContractResolver = new CamelCasePropertyNamesContractResolver()
         };
+
         public WebSocketHandler(WebSocketConnectionManager webSocketConnectionManager)
         {
             WebSocketConnectionManager = webSocketConnectionManager;
         }
 
+        /// <summary>
+        /// Called when a client has connected to the server.
+        /// </summary>
+        /// <param name="socket">The web-socket of the client.</param>
+        /// <returns>Awaitable Task.</returns>
         public virtual async Task OnConnected(WebSocket socket)
         {
             WebSocketConnectionManager.AddSocket(socket);
@@ -33,16 +40,64 @@ namespace WebSocketManager
             }).ConfigureAwait(false);
         }
 
+        /// <summary>
+        /// Called when a client has disconnected from the server.
+        /// </summary>
+        /// <param name="socket">The web-socket of the client.</param>
+        /// <returns>Awaitable Task.</returns>
         public virtual async Task OnDisconnected(WebSocket socket)
         {
             await WebSocketConnectionManager.RemoveSocket(WebSocketConnectionManager.GetId(socket)).ConfigureAwait(false);
+        }
+
+        /// <summary>
+        /// Called when an invoke method call has been received. The default implementation uses
+        /// reflection to find the method in this <see cref="WebSocketHandler"/>.
+        /// </summary>
+        /// <param name="socket">The web-socket of the client that wants to invoke a method.</param>
+        /// <param name="invocationDescriptor">The invocation descriptor containing the method name and parameters.</param>
+        /// <returns>Awaitable Task.</returns>
+        public virtual async Task OnInvokeMethodReceived(WebSocket socket, InvocationDescriptor invocationDescriptor)
+        {
+            var method = this.GetType().GetMethod(invocationDescriptor.MethodName);
+
+            if (method == null)
+            {
+                await SendMessageAsync(socket, new Message()
+                {
+                    MessageType = MessageType.Text,
+                    Data = $"Cannot find method {invocationDescriptor.MethodName}"
+                }).ConfigureAwait(false);
+                return;
+            }
+
+            try
+            {
+                method.Invoke(this, invocationDescriptor.Arguments);
+            }
+            catch (TargetParameterCountException)
+            {
+                await SendMessageAsync(socket, new Message()
+                {
+                    MessageType = MessageType.Text,
+                    Data = $"The {invocationDescriptor.MethodName} method does not take {invocationDescriptor.Arguments.Length} parameters!"
+                }).ConfigureAwait(false);
+            }
+            catch (ArgumentException)
+            {
+                await SendMessageAsync(socket, new Message()
+                {
+                    MessageType = MessageType.Text,
+                    Data = $"The {invocationDescriptor.MethodName} method takes different arguments!"
+                }).ConfigureAwait(false);
+            }
         }
 
         public async Task SendMessageAsync(WebSocket socket, Message message)
         {
             if (socket.State != WebSocketState.Open)
                 return;
-            
+
             var serializedMessage = JsonConvert.SerializeObject(message, _jsonSerializerSettings);
             var encodedMessage = Encoding.UTF8.GetBytes(serializedMessage);
             await socket.SendAsync(buffer: new ArraySegment<byte>(array: encodedMessage,
@@ -130,7 +185,7 @@ namespace WebSocketManager
             {
                 foreach (var id in sockets)
                 {
-                    if(id != except)
+                    if (id != except)
                         await SendMessageAsync(id, message);
                 }
             }
@@ -151,11 +206,11 @@ namespace WebSocketManager
         public async Task InvokeClientMethodToGroupAsync(string groupID, string methodName, string except, params object[] arguments)
         {
             var sockets = WebSocketConnectionManager.GetAllFromGroup(groupID);
-            if(sockets != null)
+            if (sockets != null)
             {
                 foreach (var id in sockets)
                 {
-                    if(id != except)
+                    if (id != except)
                         await InvokeClientMethodAsync(id, methodName, arguments);
                 }
             }
@@ -163,45 +218,19 @@ namespace WebSocketManager
 
         public async Task ReceiveAsync(WebSocket socket, WebSocketReceiveResult result, string serializedInvocationDescriptor)
         {
-            var invocationDescriptor = JsonConvert.DeserializeObject<InvocationDescriptor>(serializedInvocationDescriptor);
-
-            var method = this.GetType().GetMethod(invocationDescriptor.MethodName);
-
-            if (method == null)
-            {
-                await SendMessageAsync(socket, new Message()
-                {
-                    MessageType = MessageType.Text,
-                    Data = $"Cannot find method {invocationDescriptor.MethodName}"
-                }).ConfigureAwait(false);
-                return;
-            }
-
+            InvocationDescriptor invocationDescriptor = null;
             try
             {
-                method.Invoke(this, invocationDescriptor.Arguments);
+                invocationDescriptor = JsonConvert.DeserializeObject<InvocationDescriptor>(serializedInvocationDescriptor);
+                if (invocationDescriptor == null) return;
             }
-            catch (TargetParameterCountException)
-            {
-                await SendMessageAsync(socket, new Message()
-                {
-                    MessageType = MessageType.Text,
-                    Data = $"The {invocationDescriptor.MethodName} method does not take {invocationDescriptor.Arguments.Length} parameters!"
-                }).ConfigureAwait(false);
-            }
+            catch { } // ignore invalid data sent to the server.
 
-            catch (ArgumentException)
-            {
-                await SendMessageAsync(socket, new Message()
-                {
-                    MessageType = MessageType.Text,
-                    Data = $"The {invocationDescriptor.MethodName} method takes different arguments!"
-                }).ConfigureAwait(false);
-            }
+            await OnInvokeMethodReceived(socket, invocationDescriptor);
         }
-		
+
         public async Task InvokeClientMethodAsync(string socketId, string method) => await InvokeClientMethodAsync(socketId, method, new object[] { });
-		
+
         public async Task InvokeClientMethodAsync<T1>(string socketId, string method, T1 arg1) => await InvokeClientMethodAsync(socketId, method, new object[] { arg1 });
 
         public async Task InvokeClientMethodAsync<T1, T2>(string socketId, string method, T1 arg1, T2 arg2) => await InvokeClientMethodAsync(socketId, method, new object[] { arg1, arg2 });
@@ -235,7 +264,7 @@ namespace WebSocketManager
         public async Task InvokeClientMethodAsync<T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13, T14, T15, T16>(string socketId, string method, T1 arg1, T2 arg2, T3 arg3, T4 arg4, T5 arg5, T6 arg6, T7 arg7, T8 arg8, T9 arg9, T10 arg10, T11 arg11, T12 arg12, T13 arg13, T14 arg14, T15 arg15, T16 arg16) => await InvokeClientMethodAsync(socketId, method, new object[] { arg1, arg2, arg3, arg4, arg5, arg6, arg7, arg8, arg9, arg10, arg11, arg12, arg13, arg14, arg15, arg16 });
 
         public async Task InvokeClientMethodToAllAsync(string method) => await InvokeClientMethodToAllAsync(method, new object[] { });
-		
+
         public async Task InvokeClientMethodToAllAsync<T1>(string method, T1 arg1) => await InvokeClientMethodToAllAsync(method, new object[] { arg1 });
 
         public async Task InvokeClientMethodToAllAsync<T1, T2>(string method, T1 arg1, T2 arg2) => await InvokeClientMethodToAllAsync(method, new object[] { arg1, arg2 });
