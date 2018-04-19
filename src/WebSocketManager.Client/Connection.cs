@@ -64,13 +64,12 @@ namespace WebSocketManager.Client
       await _clientWebSocket.SendAsync(new ArraySegment<byte>(bytes), WebSocketMessageType.Text, true, CancellationToken.None);
     }
     private void Invoke(InvocationDescriptor invocationDescriptor)
-        {
-			if (!_handlers.ContainsKey(invocationDescriptor.MethodName))
-                return;
-            var invocationHandler = _handlers[invocationDescriptor.MethodName];
-            if (invocationHandler != null)
-                invocationHandler.Handler(invocationDescriptor.Arguments);
-        }
+    {
+      if (_handlers.TryGetValue(invocationDescriptor.MethodName, out InvocationHandler invocationHandler))
+      {
+        invocationHandler.Handler(invocationDescriptor.Arguments);
+      }
+    }
 
         public async Task StopConnectionAsync()
         {
