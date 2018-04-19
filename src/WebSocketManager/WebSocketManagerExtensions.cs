@@ -7,11 +7,13 @@ namespace WebSocketManager
 {
     public static class WebSocketManagerExtensions
     {
-        public static IServiceCollection AddWebSocketManager(this IServiceCollection services)
+        public static IServiceCollection AddWebSocketManager(this IServiceCollection services, Assembly assembly = null)
         {
             services.AddTransient<WebSocketConnectionManager>();
+            
+            Assembly ass = assembly ?? Assembly.GetEntryAssembly();
 
-            foreach (var type in Assembly.GetEntryAssembly().ExportedTypes)
+            foreach (var type in ass.ExportedTypes)
             {
                 if (type.GetTypeInfo().BaseType == typeof(WebSocketHandler))
                 {
