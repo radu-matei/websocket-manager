@@ -74,7 +74,14 @@ namespace WebSocketManager.Client
             await _clientWebSocket.SendAsync(new ArraySegment<byte>(bytes), WebSocketMessageType.Text, true, CancellationToken.None);
         }
 
-        private void Invoke(InvocationDescriptor invocationDescriptor)
+        /// <summary>
+        /// Called when an invoke method call has been received. The default implementation calls
+        /// actions registered with the <see cref="On(string, Action{object[]})"/> method.
+        /// </summary>
+        /// <param name="invocationDescriptor">
+        /// The invocation descriptor containing the method name and parameters.
+        /// </param>
+        protected virtual void Invoke(InvocationDescriptor invocationDescriptor)
         {
             var invocationHandler = _handlers[invocationDescriptor.MethodName];
             if (invocationHandler != null)
