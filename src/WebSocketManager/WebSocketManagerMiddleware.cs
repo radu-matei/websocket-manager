@@ -35,14 +35,12 @@ namespace WebSocketManager
                     await _webSocketHandler.ReceiveAsync(socket, result, serializedInvocationDescriptor).ConfigureAwait(false);
                     return;
                 }
-
                 else if (result.MessageType == WebSocketMessageType.Close)
                 {
                     try
                     {
                         await _webSocketHandler.OnDisconnected(socket);
                     }
-
                     catch (WebSocketException)
                     {
                         throw; //let's not swallow any exception for now
@@ -50,7 +48,6 @@ namespace WebSocketManager
 
                     return;
                 }
-
             });
 
             //TODO - investigate the Kestrel exception thrown when this is the last middleware
@@ -93,6 +90,8 @@ namespace WebSocketManager
                     }
                 }
             }
+
+            await _webSocketHandler.OnDisconnected(socket);
         }
     }
 }
