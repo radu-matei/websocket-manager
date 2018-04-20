@@ -57,7 +57,7 @@ namespace WebSocketManager
         /// <param name="socket">The web-socket of the client that wants to invoke a method.</param>
         /// <param name="invocationDescriptor">The invocation descriptor containing the method name and parameters.</param>
         /// <returns>Awaitable Task.</returns>
-        public virtual async Task OnInvokeMethodReceived(WebSocket socket, InvocationDescriptor invocationDescriptor)
+        public virtual async Task<object> OnInvokeMethodReceived(WebSocket socket, InvocationDescriptor invocationDescriptor)
         {
             var method = this.GetType().GetMethod(invocationDescriptor.MethodName);
 
@@ -68,12 +68,12 @@ namespace WebSocketManager
                     MessageType = MessageType.Text,
                     Data = $"Cannot find method {invocationDescriptor.MethodName}"
                 }).ConfigureAwait(false);
-                return;
+                return null;
             }
 
             try
             {
-                method.Invoke(this, invocationDescriptor.Arguments);
+                return method.Invoke(this, invocationDescriptor.Arguments);
             }
             catch (TargetParameterCountException)
             {
@@ -91,6 +91,8 @@ namespace WebSocketManager
                     Data = $"The {invocationDescriptor.MethodName} method takes different arguments!"
                 }).ConfigureAwait(false);
             }
+
+            return null;
         }
 
         public async Task SendMessageAsync(WebSocket socket, Message message)
@@ -218,15 +220,45 @@ namespace WebSocketManager
 
         public async Task ReceiveAsync(WebSocket socket, WebSocketReceiveResult result, string serializedInvocationDescriptor)
         {
+            // retrieve the method invocation request.
             InvocationDescriptor invocationDescriptor = null;
             try
             {
                 invocationDescriptor = JsonConvert.DeserializeObject<InvocationDescriptor>(serializedInvocationDescriptor);
                 if (invocationDescriptor == null) return;
             }
-            catch { } // ignore invalid data sent to the server.
+            catch { return; } // ignore invalid data sent to the server.
 
-            await OnInvokeMethodReceived(socket, invocationDescriptor);
+            // invoke the method and get the result.
+            InvocationResult invokeResult;
+            try
+            {
+                // create an invocation result with the results.
+                invokeResult = new InvocationResult()
+                {
+                    Identifier = invocationDescriptor.Identifier,
+                    Result = await OnInvokeMethodReceived(socket, invocationDescriptor),
+                    Exception = null
+                };
+            }
+            // send the exception as the invocation result if there was one.
+            catch (Exception ex)
+            {
+                invokeResult = new InvocationResult()
+                {
+                    Identifier = invocationDescriptor.Identifier,
+                    Result = null,
+                    Exception = ex
+                };
+            }
+
+            // send a message to the client containing the result.
+            var message = new Message()
+            {
+                MessageType = MessageType.ClientMethodReturnValue,
+                Data = JsonConvert.SerializeObject(invokeResult, _jsonSerializerSettings)
+            };
+            await SendMessageAsync(socket, message).ConfigureAwait(false);
         }
 
         public async Task InvokeClientMethodAsync(string socketId, string method) => await InvokeClientMethodAsync(socketId, method, new object[] { });

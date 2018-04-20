@@ -10,7 +10,7 @@ namespace WebSocketManager
         public static IServiceCollection AddWebSocketManager(this IServiceCollection services, Assembly assembly = null)
         {
             services.AddTransient<WebSocketConnectionManager>();
-            
+
             Assembly ass = assembly ?? Assembly.GetEntryAssembly();
 
             foreach (var type in ass.ExportedTypes)

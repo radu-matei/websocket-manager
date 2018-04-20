@@ -4,7 +4,8 @@
     {
         Text,
         ClientMethodInvocation,
-        ConnectionEvent
+        ConnectionEvent,
+        ClientMethodReturnValue
     }
 
     public class Message
