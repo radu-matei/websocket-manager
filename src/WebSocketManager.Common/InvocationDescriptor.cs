@@ -27,6 +27,6 @@ namespace WebSocketManager.Common
         /// </summary>
         /// <value>The unique identifier of the invocation.</value>
         [JsonProperty("identifier")]
-        public Guid Identifier { get; set; }
+        public Guid Identifier { get; set; } = Guid.Empty;
     }
 }

@@ -229,36 +229,45 @@ namespace WebSocketManager
             }
             catch { return; } // ignore invalid data sent to the server.
 
-            // invoke the method and get the result.
-            InvocationResult invokeResult;
-            try
+            // if the unique identifier hasn't been set then the client doesn't want a return value.
+            if (invocationDescriptor.Identifier == Guid.Empty)
             {
-                // create an invocation result with the results.
-                invokeResult = new InvocationResult()
-                {
-                    Identifier = invocationDescriptor.Identifier,
-                    Result = await OnInvokeMethodReceived(socket, invocationDescriptor),
-                    Exception = null
-                };
+                // invoke the method only.
+                await OnInvokeMethodReceived(socket, invocationDescriptor);
             }
-            // send the exception as the invocation result if there was one.
-            catch (Exception ex)
+            else
             {
-                invokeResult = new InvocationResult()
+                // invoke the method and get the result.
+                InvocationResult invokeResult;
+                try
                 {
-                    Identifier = invocationDescriptor.Identifier,
-                    Result = null,
-                    Exception = ex
-                };
-            }
+                    // create an invocation result with the results.
+                    invokeResult = new InvocationResult()
+                    {
+                        Identifier = invocationDescriptor.Identifier,
+                        Result = await OnInvokeMethodReceived(socket, invocationDescriptor),
+                        Exception = null
+                    };
+                }
+                // send the exception as the invocation result if there was one.
+                catch (Exception ex)
+                {
+                    invokeResult = new InvocationResult()
+                    {
+                        Identifier = invocationDescriptor.Identifier,
+                        Result = null,
+                        Exception = ex
+                    };
+                }
 
-            // send a message to the client containing the result.
-            var message = new Message()
-            {
-                MessageType = MessageType.ClientMethodReturnValue,
-                Data = JsonConvert.SerializeObject(invokeResult, _jsonSerializerSettings)
-            };
-            await SendMessageAsync(socket, message).ConfigureAwait(false);
+                // send a message to the client containing the result.
+                var message = new Message()
+                {
+                    MessageType = MessageType.ClientMethodReturnValue,
+                    Data = JsonConvert.SerializeObject(invokeResult, _jsonSerializerSettings)
+                };
+                await SendMessageAsync(socket, message).ConfigureAwait(false);
+            }
         }
 
         public async Task InvokeClientMethodAsync(string socketId, string method) => await InvokeClientMethodAsync(socketId, method, new object[] { });
