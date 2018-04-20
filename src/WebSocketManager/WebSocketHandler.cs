@@ -17,7 +17,10 @@ namespace WebSocketManager
 
         private JsonSerializerSettings _jsonSerializerSettings = new JsonSerializerSettings()
         {
-            ContractResolver = new CamelCasePropertyNamesContractResolver()
+            ContractResolver = new CamelCasePropertyNamesContractResolver(),
+            TypeNameHandling = TypeNameHandling.All,
+            TypeNameAssemblyFormatHandling = TypeNameAssemblyFormatHandling.Simple,
+            SerializationBinder = new JsonBinderWithoutAssembly()
         };
 
         /// <summary>
@@ -27,6 +30,7 @@ namespace WebSocketManager
 
         public WebSocketHandler(WebSocketConnectionManager webSocketConnectionManager)
         {
+            _jsonSerializerSettings.Converters.Insert(0, new PrimitiveJsonConverter());
             WebSocketConnectionManager = webSocketConnectionManager;
         }
 

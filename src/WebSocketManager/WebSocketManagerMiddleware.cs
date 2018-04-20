@@ -18,12 +18,16 @@ namespace WebSocketManager
 
         private JsonSerializerSettings _jsonSerializerSettings = new JsonSerializerSettings()
         {
-            ContractResolver = new CamelCasePropertyNamesContractResolver()
+            ContractResolver = new CamelCasePropertyNamesContractResolver(),
+            TypeNameHandling = TypeNameHandling.All,
+            TypeNameAssemblyFormatHandling = TypeNameAssemblyFormatHandling.Simple,
+            SerializationBinder = new JsonBinderWithoutAssembly()
         };
 
         public WebSocketManagerMiddleware(RequestDelegate next,
                                           WebSocketHandler webSocketHandler)
         {
+            _jsonSerializerSettings.Converters.Insert(0, new PrimitiveJsonConverter());
             _next = next;
             _webSocketHandler = webSocketHandler;
         }

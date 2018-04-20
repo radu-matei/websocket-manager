@@ -20,7 +20,10 @@ namespace WebSocketManager.Client
 
         private JsonSerializerSettings _jsonSerializerSettings = new JsonSerializerSettings()
         {
-            ContractResolver = new CamelCasePropertyNamesContractResolver()
+            ContractResolver = new CamelCasePropertyNamesContractResolver(),
+            TypeNameHandling = TypeNameHandling.All,
+            TypeNameAssemblyFormatHandling = TypeNameAssemblyFormatHandling.Simple,
+            SerializationBinder = new JsonBinderWithoutAssembly()
         };
 
         private Dictionary<string, InvocationHandler> _handlers = new Dictionary<string, InvocationHandler>();
@@ -32,6 +35,7 @@ namespace WebSocketManager.Client
 
         public Connection()
         {
+            _jsonSerializerSettings.Converters.Insert(0, new PrimitiveJsonConverter());
         }
 
         public async Task StartConnectionAsync(string uri)
@@ -60,7 +64,7 @@ namespace WebSocketManager.Client
                     InvocationDescriptor invocationDescriptor = null;
                     try
                     {
-                        invocationDescriptor = JsonConvert.DeserializeObject<InvocationDescriptor>(receivedMessage.Data);
+                        invocationDescriptor = JsonConvert.DeserializeObject<InvocationDescriptor>(receivedMessage.Data, _jsonSerializerSettings);
                         if (invocationDescriptor == null) return;
                     }
                     catch { return; } // ignore invalid data sent to the client.
@@ -102,7 +106,7 @@ namespace WebSocketManager.Client
                             MessageType = MessageType.MethodReturnValue,
                             Data = JsonConvert.SerializeObject(invokeResult, _jsonSerializerSettings)
                         };
-                        var bytes = Encoding.UTF8.GetBytes(JsonConvert.SerializeObject(message));
+                        var bytes = Encoding.UTF8.GetBytes(JsonConvert.SerializeObject(message, _jsonSerializerSettings));
                         await _clientWebSocket.SendAsync(new ArraySegment<byte>(bytes), WebSocketMessageType.Text, true, CancellationToken.None).ConfigureAwait(false);
                     }
                 }
@@ -144,7 +148,7 @@ namespace WebSocketManager.Client
             _waitingRemoteInvocations.Add(invocationDescriptor.Identifier, task);
 
             // send the method invocation to the server.
-            var bytes = Encoding.UTF8.GetBytes(JsonConvert.SerializeObject(new Message { MessageType = MessageType.MethodInvocation, Data = JsonConvert.SerializeObject(invocationDescriptor) }));
+            var bytes = Encoding.UTF8.GetBytes(JsonConvert.SerializeObject(new Message { MessageType = MessageType.MethodInvocation, Data = JsonConvert.SerializeObject(invocationDescriptor, _jsonSerializerSettings) }, _jsonSerializerSettings));
             await _clientWebSocket.SendAsync(new ArraySegment<byte>(bytes), WebSocketMessageType.Text, true, CancellationToken.None);
 
             // wait for the return value elsewhere in the program.
@@ -229,7 +233,7 @@ namespace WebSocketManager.Client
 
                 if (result.MessageType == WebSocketMessageType.Text)
                 {
-                    var message = JsonConvert.DeserializeObject<Message>(serializedMessage);
+                    var message = JsonConvert.DeserializeObject<Message>(serializedMessage, _jsonSerializerSettings);
                     handleMessage(message);
                 }
                 else if (result.MessageType == WebSocketMessageType.Close)
