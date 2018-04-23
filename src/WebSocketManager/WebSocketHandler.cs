@@ -28,10 +28,22 @@ namespace WebSocketManager
         /// </summary>
         private Dictionary<Guid, TaskCompletionSource<InvocationResult>> _waitingRemoteInvocations = new Dictionary<Guid, TaskCompletionSource<InvocationResult>>();
 
-        public WebSocketHandler(WebSocketConnectionManager webSocketConnectionManager)
+        /// <summary>
+        /// Gets the method invocation strategy.
+        /// </summary>
+        /// <value>The method invocation strategy.</value>
+        public MethodInvocationStrategy MethodInvocationStrategy { get; }
+
+        /// <summary>
+        /// Initializes a new instance of the <see cref="WebSocketHandler"/> class.
+        /// </summary>
+        /// <param name="webSocketConnectionManager">The web socket connection manager.</param>
+        /// <param name="methodInvocationStrategy">The method invocation strategy used for incoming requests.</param>
+        public WebSocketHandler(WebSocketConnectionManager webSocketConnectionManager, MethodInvocationStrategy methodInvocationStrategy)
         {
             _jsonSerializerSettings.Converters.Insert(0, new PrimitiveJsonConverter());
             WebSocketConnectionManager = webSocketConnectionManager;
+            MethodInvocationStrategy = methodInvocationStrategy;
         }
 
         /// <summary>
@@ -58,51 +70,6 @@ namespace WebSocketManager
         public virtual async Task OnDisconnected(WebSocket socket)
         {
             await WebSocketConnectionManager.RemoveSocket(WebSocketConnectionManager.GetId(socket)).ConfigureAwait(false);
-        }
-
-        /// <summary>
-        /// Called when an invoke method call has been received. The default implementation uses
-        /// reflection to find the method in this <see cref="WebSocketHandler"/>.
-        /// </summary>
-        /// <param name="socket">The web-socket of the client that wants to invoke a method.</param>
-        /// <param name="invocationDescriptor">The invocation descriptor containing the method name and parameters.</param>
-        /// <returns>Awaitable Task.</returns>
-        public virtual async Task<object> OnInvokeMethodReceived(WebSocket socket, InvocationDescriptor invocationDescriptor)
-        {
-            var method = this.GetType().GetMethod(invocationDescriptor.MethodName);
-
-            if (method == null)
-            {
-                await SendMessageAsync(socket, new Message()
-                {
-                    MessageType = MessageType.Text,
-                    Data = $"Cannot find method {invocationDescriptor.MethodName}"
-                }).ConfigureAwait(false);
-                return null;
-            }
-
-            try
-            {
-                return method.Invoke(this, invocationDescriptor.Arguments);
-            }
-            catch (TargetParameterCountException)
-            {
-                await SendMessageAsync(socket, new Message()
-                {
-                    MessageType = MessageType.Text,
-                    Data = $"The {invocationDescriptor.MethodName} method does not take {invocationDescriptor.Arguments.Length} parameters!"
-                }).ConfigureAwait(false);
-            }
-            catch (ArgumentException)
-            {
-                await SendMessageAsync(socket, new Message()
-                {
-                    MessageType = MessageType.Text,
-                    Data = $"The {invocationDescriptor.MethodName} method takes different arguments!"
-                }).ConfigureAwait(false);
-            }
-
-            return null;
         }
 
         public async Task SendMessageAsync(WebSocket socket, Message message)
@@ -288,7 +255,7 @@ namespace WebSocketManager
                 if (invocationDescriptor.Identifier == Guid.Empty)
                 {
                     // invoke the method only.
-                    await OnInvokeMethodReceived(socket, invocationDescriptor);
+                    await MethodInvocationStrategy.OnInvokeMethodReceivedAsync(socket, invocationDescriptor);
                 }
                 else
                 {
@@ -300,7 +267,7 @@ namespace WebSocketManager
                         invokeResult = new InvocationResult()
                         {
                             Identifier = invocationDescriptor.Identifier,
-                            Result = await OnInvokeMethodReceived(socket, invocationDescriptor),
+                            Result = await MethodInvocationStrategy.OnInvokeMethodReceivedAsync(socket, invocationDescriptor),
                             Exception = null
                         };
                     }
