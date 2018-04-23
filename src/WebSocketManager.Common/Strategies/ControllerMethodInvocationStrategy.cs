@@ -28,6 +28,12 @@ namespace WebSocketManager.Common
         public string Prefix { get; } = "";
 
         /// <summary>
+        /// Gets a value indicating whether there is no websocket argument (useful for client-side methods).
+        /// </summary>
+        /// <value><c>true</c> if there is no websocket argument; otherwise, <c>false</c>.</value>
+        public bool NoWebsocketArgument { get; set; } = false;
+
+        /// <summary>
         /// Initializes a new instance of the <see cref="ControllerMethodInvocationStrategy"/> class.
         /// </summary>
         /// <param name="controller">The controller containing the methods.</param>
@@ -68,9 +74,10 @@ namespace WebSocketManager.Common
             // if the method could not be found:
             if (method == null) throw new Exception($"Received unknown command '{command}' for controller '{Controller.GetType().Name}'.");
 
-            // insert client as parameter.
+            // optionally insert client as parameter.
             List<object> args = invocationDescriptor.Arguments.ToList();
-            args.Insert(0, socket);
+            if (!NoWebsocketArgument)
+                args.Insert(0, socket);
 
             // call the method asynchronously.
             try
