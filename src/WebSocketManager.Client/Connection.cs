@@ -26,15 +26,24 @@ namespace WebSocketManager.Client
             SerializationBinder = new JsonBinderWithoutAssembly()
         };
 
-        private Dictionary<string, InvocationHandler> _handlers = new Dictionary<string, InvocationHandler>();
+        /// <summary>
+        /// Gets the method invocation strategy.
+        /// </summary>
+        /// <value>The method invocation strategy.</value>
+        public MethodInvocationStrategy MethodInvocationStrategy { get; }
 
         /// <summary>
         /// The waiting remote invocations for Client to Server method calls.
         /// </summary>
         private Dictionary<Guid, TaskCompletionSource<InvocationResult>> _waitingRemoteInvocations = new Dictionary<Guid, TaskCompletionSource<InvocationResult>>();
 
-        public Connection()
+        /// <summary>
+        /// Initializes a new instance of the <see cref="Connection"/> class.
+        /// </summary>
+        /// <param name="methodInvocationStrategy">The method invocation strategy used for incoming requests.</param>
+        public Connection(MethodInvocationStrategy methodInvocationStrategy)
         {
+            MethodInvocationStrategy = methodInvocationStrategy;
             _jsonSerializerSettings.Converters.Insert(0, new PrimitiveJsonConverter());
         }
 
@@ -73,7 +82,7 @@ namespace WebSocketManager.Client
                     if (invocationDescriptor.Identifier == Guid.Empty)
                     {
                         // invoke the method only.
-                        await Invoke(invocationDescriptor);
+                        await MethodInvocationStrategy.OnInvokeMethodReceivedAsync(_clientWebSocket, invocationDescriptor);
                     }
                     else
                     {
@@ -85,7 +94,7 @@ namespace WebSocketManager.Client
                             invokeResult = new InvocationResult()
                             {
                                 Identifier = invocationDescriptor.Identifier,
-                                Result = await Invoke(invocationDescriptor),
+                                Result = await MethodInvocationStrategy.OnInvokeMethodReceivedAsync(_clientWebSocket, invocationDescriptor),
                                 Exception = null
                             };
                         }
@@ -123,12 +132,6 @@ namespace WebSocketManager.Client
                     }
                 }
             });
-        }
-
-        public void On(string methodName, Func<object[], object> handler)
-        {
-            var invocationHandler = new InvocationHandler(handler, new Type[] { });
-            _handlers.Add(methodName, invocationHandler);
         }
 
         /// <summary>
@@ -185,21 +188,6 @@ namespace WebSocketManager.Client
             // send the method invocation to the server.
             var bytes = Encoding.UTF8.GetBytes(JsonConvert.SerializeObject(new Message { MessageType = MessageType.MethodInvocation, Data = JsonConvert.SerializeObject(invocationDescriptor) }));
             await _clientWebSocket.SendAsync(new ArraySegment<byte>(bytes), WebSocketMessageType.Text, true, CancellationToken.None);
-        }
-
-        /// <summary>
-        /// Called when an invoke method call has been received. The default implementation calls
-        /// actions registered with the <see cref="On(string, Func{object[], object})"/> method.
-        /// </summary>
-        /// <param name="invocationDescriptor">
-        /// The invocation descriptor containing the method name and parameters.
-        /// </param>
-        protected virtual async Task<object> Invoke(InvocationDescriptor invocationDescriptor)
-        {
-            var invocationHandler = _handlers[invocationDescriptor.MethodName];
-            if (invocationHandler != null)
-                return await Task.Run(() => invocationHandler.Handler(invocationDescriptor.Arguments));
-            return Task.CompletedTask;
         }
 
         public async Task StopConnectionAsync()
@@ -311,17 +299,5 @@ namespace WebSocketManager.Client
         public async Task<Result> SendAsync<Result, T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13, T14, T15>(string method, T1 arg1, T2 arg2, T3 arg3, T4 arg4, T5 arg5, T6 arg6, T7 arg7, T8 arg8, T9 arg9, T10 arg10, T11 arg11, T12 arg12, T13 arg13, T14 arg14, T15 arg15) => await SendAsync<Result>(new InvocationDescriptor { MethodName = method, Arguments = new object[] { arg1, arg2, arg3, arg4, arg5, arg6, arg7, arg8, arg9, arg10, arg11, arg12, arg13, arg14, arg15 } });
 
         public async Task<Result> SendAsync<Result, T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13, T14, T15, T16>(string method, T1 arg1, T2 arg2, T3 arg3, T4 arg4, T5 arg5, T6 arg6, T7 arg7, T8 arg8, T9 arg9, T10 arg10, T11 arg11, T12 arg12, T13 arg13, T14 arg14, T15 arg15, T16 arg16) => await SendAsync<Result>(new InvocationDescriptor { MethodName = method, Arguments = new object[] { arg1, arg2, arg3, arg4, arg5, arg6, arg7, arg8, arg9, arg10, arg11, arg12, arg13, arg14, arg15, arg16 } });
-    }
-
-    public class InvocationHandler
-    {
-        public Func<object[], object> Handler { get; set; }
-        public Type[] ParameterTypes { get; set; }
-
-        public InvocationHandler(Func<object[], object> handler, Type[] parameterTypes)
-        {
-            Handler = handler;
-            ParameterTypes = parameterTypes;
-        }
     }
 }
