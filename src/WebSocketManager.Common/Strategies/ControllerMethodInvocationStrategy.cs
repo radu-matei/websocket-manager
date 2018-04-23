@@ -22,7 +22,7 @@ namespace WebSocketManager.Common
 
         /// <summary>
         /// Gets the method name prefix. This prevents users from calling methods they aren't
-        /// supposed to call. You could for example use the awesome ᐅ character.
+        /// supposed to call. You could for example use the awesome 'ᐅ' character.
         /// </summary>
         /// <value>The method name prefix.</value>
         public string Prefix { get; } = "";
@@ -30,7 +30,19 @@ namespace WebSocketManager.Common
         /// <summary>
         /// Initializes a new instance of the <see cref="ControllerMethodInvocationStrategy"/> class.
         /// </summary>
-        /// <param name="prefix">The method name prefix. This prevents users from calling methods they aren't supposed to call. You could for example use the awesome ᐅ character.</param>
+        /// <param name="controller">The controller containing the methods.</param>
+        public ControllerMethodInvocationStrategy(object controller)
+        {
+            Controller = controller;
+        }
+
+        /// <summary>
+        /// Initializes a new instance of the <see cref="ControllerMethodInvocationStrategy"/> class.
+        /// </summary>
+        /// <param name="prefix">
+        /// The method name prefix. This prevents users from calling methods they aren't supposed to
+        /// call. You could for example use the awesome 'ᐅ' character.
+        /// </param>
         /// <param name="controller">The controller containing the methods.</param>
         public ControllerMethodInvocationStrategy(string prefix, object controller)
         {

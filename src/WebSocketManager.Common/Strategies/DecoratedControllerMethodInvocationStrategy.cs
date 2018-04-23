@@ -16,7 +16,7 @@ namespace WebSocketManager.Common
     {
         /// <summary>
         /// Gets the method name prefix. This prevents users from calling methods they aren't
-        /// supposed to call. You could for example use the awesome ᐅ character.
+        /// supposed to call. You could for example use the awesome 'ᐅ' character.
         /// </summary>
         /// <value>The method name prefix.</value>
         public string Prefix { get; } = "";
@@ -37,10 +37,36 @@ namespace WebSocketManager.Common
         /// Initializes a new instance of the <see
         /// cref="DecoratedControllerMethodInvocationStrategy"/> class.
         /// </summary>
-        /// <param name="prefix">The method name prefix. This prevents users from calling methods they aren't supposed to call. You could for example use the awesome ᐅ character.</param>
+        public DecoratedControllerMethodInvocationStrategy()
+        {
+        }
+
+        /// <summary>
+        /// Initializes a new instance of the <see
+        /// cref="DecoratedControllerMethodInvocationStrategy"/> class.
+        /// </summary>
+        /// <param name="prefix">
+        /// The method name prefix. This prevents users from calling methods they aren't supposed to
+        /// call. You could for example use the awesome 'ᐅ' character.
+        /// </param>
         public DecoratedControllerMethodInvocationStrategy(string prefix)
         {
             Prefix = prefix;
+        }
+
+        /// <summary>
+        /// Initializes a new instance of the <see
+        /// cref="DecoratedControllerMethodInvocationStrategy"/> class.
+        /// </summary>
+        /// <param name="prefix">
+        /// The method name prefix. This prevents users from calling methods they aren't supposed to
+        /// call. You could for example use the awesome 'ᐅ' character.
+        /// </param>
+        /// <param name="separator">The prefix and method name separator. Default value is a forward slash '/'.</param>
+        public DecoratedControllerMethodInvocationStrategy(string prefix, char separator)
+        {
+            Prefix = prefix;
+            Separator = separator;
         }
 
         /// <summary>
