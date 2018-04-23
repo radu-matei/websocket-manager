@@ -82,7 +82,14 @@ namespace WebSocketManager.Client
                     if (invocationDescriptor.Identifier == Guid.Empty)
                     {
                         // invoke the method only.
-                        await MethodInvocationStrategy.OnInvokeMethodReceivedAsync(_clientWebSocket, invocationDescriptor);
+                        try
+                        {
+                            await MethodInvocationStrategy.OnInvokeMethodReceivedAsync(_clientWebSocket, invocationDescriptor);
+                        }
+                        catch (Exception)
+                        {
+                            // we consume all exceptions.
+                        }
                     }
                     else
                     {
@@ -105,7 +112,7 @@ namespace WebSocketManager.Client
                             {
                                 Identifier = invocationDescriptor.Identifier,
                                 Result = null,
-                                Exception = ex
+                                Exception = new RemoteException(ex)
                             };
                         }
 
@@ -147,7 +154,7 @@ namespace WebSocketManager.Client
             // add ourselves to the waiting list for return values.
             TaskCompletionSource<InvocationResult> task = new TaskCompletionSource<InvocationResult>();
             // after a timeout of 60 seconds we will cancel the task and remove it from the waiting list.
-            new CancellationTokenSource(1000 * 60).Token.Register(() => { _waitingRemoteInvocations.Remove(invocationDescriptor.Identifier); task.TrySetCanceled(); }, useSynchronizationContext: false);
+            new CancellationTokenSource(1000 * 60).Token.Register(() => { _waitingRemoteInvocations.Remove(invocationDescriptor.Identifier); task.TrySetCanceled(); });
             _waitingRemoteInvocations.Add(invocationDescriptor.Identifier, task);
 
             // send the method invocation to the server.
@@ -164,7 +171,7 @@ namespace WebSocketManager.Client
             {
                 // there was a remote exception so we throw it here.
                 if (result.Exception != null)
-                    throw new RemoteException(result.Exception);
+                    throw new Exception(result.Exception.Message);
 
                 // return the value.
 

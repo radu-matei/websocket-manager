@@ -1,27 +1,34 @@
-﻿using System;
+﻿using Newtonsoft.Json;
+using System;
 
 namespace WebSocketManager.Common
 {
     /// <summary>
     /// An exception that occured remotely.
     /// </summary>
-    /// <seealso cref="System.Exception"/>
-    public class RemoteException : Exception
+    public class RemoteException
     {
         /// <summary>
-        /// The actual remote exception.
+        /// Gets or sets the exception message.
         /// </summary>
-        private Exception m_RemoteException;
+        /// <value>The exception message.</value>
+        [JsonProperty("message")]
+        public string Message { get; set; } = $"A remote exception occured";
 
         /// <summary>
         /// Initializes a new instance of the <see cref="RemoteException"/> class.
         /// </summary>
-        /// <param name="remoteException">The remote exception.</param>
-        public RemoteException(Exception remoteException) : base("", remoteException)
+        public RemoteException()
         {
-            m_RemoteException = remoteException;
         }
 
-        public override string Message => $"A remote exception occured: '{m_RemoteException.Message}'.";
+        /// <summary>
+        /// Initializes a new instance of the <see cref="RemoteException"/> class.
+        /// </summary>
+        /// <param name="exception">The exception that occured.</param>
+        public RemoteException(Exception exception)
+        {
+            Message = $"A remote exception occured: '{exception.Message}'.";
+        }
     }
 }

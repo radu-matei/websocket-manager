@@ -73,7 +73,14 @@ namespace WebSocketManager.Common
             args.Insert(0, socket);
 
             // call the method asynchronously.
-            return await Task.Run(() => method.Invoke(Controller, args.ToArray()));
+            try
+            {
+                return await Task.Run(() => method.Invoke(Controller, args.ToArray()));
+            }
+            catch (TargetInvocationException ex)
+            {
+                throw ex.InnerException;
+            }
         }
     }
 }

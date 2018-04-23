@@ -27,6 +27,6 @@ namespace WebSocketManager.Common
         /// </summary>
         /// <value>The remote exception of the method call.</value>
         [JsonProperty("exception")]
-        public Exception Exception { get; set; }
+        public RemoteException Exception { get; set; }
     }
 }

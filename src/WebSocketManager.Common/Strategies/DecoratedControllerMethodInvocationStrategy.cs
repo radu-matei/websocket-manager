@@ -112,7 +112,14 @@ namespace WebSocketManager.Common
                 args.Insert(0, socket);
 
                 // call the method asynchronously.
-                return await Task.Run(() => method.Invoke(self, args.ToArray()));
+                try
+                {
+                    return await Task.Run(() => method.Invoke(self, args.ToArray()));
+                }
+                catch (TargetInvocationException ex)
+                {
+                    throw ex.InnerException;
+                }
             }
             else throw new Exception($"Received command '{command}' for unknown controller '{controller}'.");
         }
