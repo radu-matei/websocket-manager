@@ -1,0 +1,209 @@
+/**
+ * The WebSocketManager JavaScript Client. See https://github.com/radu-matei/websocket-manager/ for more information.
+ */
+var WebSocketManager = (function () {
+    /**
+     * Create a new web socket manager.
+     * @param {any} url The web socket url (must start with ws://).
+     */
+    var constructor = function (url) {
+        if (url === undefined) console.error("WebSocketManager constructor requires valid 'url'.");
+        _this = this;
+
+        /** Collection of methods on this client. */
+        this.methods = [];
+
+        ///////////////////////////////////////////////////////////////////////////////////////////
+
+        /**
+         * Create a new networking message.
+         */
+        var Message = function (messageType, data) {
+            this.$type = 'WebSocketManager.Common.Message';
+            this.messageType = messageType;
+            this.data = data;
+        };
+        /** Text message (constant: 0). */
+        Message.Text = 0;
+        /** Remote method invocation request message (constant: 1). */
+        Message.MethodInvocation = 1;
+        /** Connection event message (constant: 2). */
+        Message.ConnectionEvent = 2;
+        /** Remote method return value message (constant: 3). */
+        Message.MethodReturnValue = 3;
+
+        ///////////////////////////////////////////////////////////////////////////////////////////
+
+        /**
+         * Create a new invocation descriptor.
+         * @param {any} methodName The name of the remote method.
+         * @param {any} args The arguments passed to the method.
+         * @param {any} identifier The unique identifier of the invocation.
+         */
+        var InvocationDescriptor = function (methodName, args, identifier) {
+            this.$type = 'WebSocketManager.Common.InvocationDescriptor';
+            this.methodName = methodName;
+            this.arguments = {
+                $type: 'System.Object[]',
+                $values: args
+            };
+            this.identifier = {
+                $type: "System.Guid",
+                $value: identifier
+            };
+        }
+
+        ///////////////////////////////////////////////////////////////////////////////////////////
+
+        /**
+         * Collection of primitive type names and their C# mappings.
+         */
+        var typemappings = {
+            guid: 'System.Guid',
+            uuid: 'System.Guid', // convenience alias
+            bool: 'System.Boolean',
+            byte: 'System.Byte',
+            sbyte: 'System.SByte',
+            char: 'System.Char',
+            decimal: 'System.Decimal',
+            double: 'System.Double',
+            float: 'System.Single',
+            int: 'System.Int32',
+            uint: 'System.UInt32',
+            long: 'System.Int64',
+            ulong: 'System.UInt64',
+            short: 'System.Int16',
+            ushort: 'System.UInt16',
+            string: 'System.String',
+            object: 'System.Object' // generic
+        };
+
+        ///////////////////////////////////////////////////////////////////////////////////////////
+
+        /**
+         * Generates a UUID using a random number generator and the current time.
+         * This is not truly unique but it's good enough (TM).
+         */
+        var uuid = function () { // Public Domain/MIT
+            var d = new Date().getTime();
+            if (typeof performance !== 'undefined' && typeof performance.now === 'function') {
+                d += performance.now(); // use high-precision timer if available
+            }
+            return 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, function (c) {
+                var r = (d + Math.random() * 16) % 16 | 0;
+                d = Math.floor(d / 16);
+                return (c === 'x' ? r : (r & 0x3 | 0x8)).toString(16);
+            });
+        }
+
+        ///////////////////////////////////////////////////////////////////////////////////////////
+
+        /**
+         * Called whenever the socket opens the connection.
+         * @param {any} event The associated event data.
+         */
+        var onSocketOpen = function (event) {
+        };
+
+        /**
+         * Called whenever the socket closes the connection.
+         * @param {any} event The associated event data.
+         */
+        var onSocketClose = function (event) {
+            // public event:
+            if (_this.onDisconnected !== undefined) _this.onDisconnected();
+        };
+
+        /**
+         * Called whenever the socket has an error.
+         * @param {any} event The associated event data.
+         */
+        var onSocketError = function (event) {
+            console.error("WebSocketManager error:");
+            console.error(event);
+        };
+
+        /**
+         * Called whenever there is an incoming message.
+         * @param {any} message The Message that was received.
+         */
+        var onSocketMessage = function (message) {
+            // CONNECTION EVENT
+            if (message.messageType === Message.ConnectionEvent) {
+                // we received the unique identifier from the server.
+                _this.id = message.data;
+                // public event:
+                if (_this.onConnected !== undefined) _this.onConnected(_this.id);
+            }
+
+            // TEXT EVENT
+            else if (message.messageType === Message.Text) {
+                // public event:
+                if (_this.onMessage !== undefined) _this.onMessage(message.data);
+            }
+
+            // METHOD INVOCATION EVENT
+            else if (message.messageType === Message.MethodInvocation) {
+                var data = JSON.parse(message.data);
+                // find the method.
+                if (_this.methods[data.methodName] !== undefined) {
+                    // call the method.
+                    _this.methods[data.methodName].apply(_this, data.arguments['$values']);
+                } else console.error("WebSocketManager: Server attempted to invoke unknown method '" + data.methodName + "'!");
+            }
+
+            //console.log(message);
+        };
+
+        ///////////////////////////////////////////////////////////////////////////////////////////
+
+        /**
+         * Connects to the server.
+         */
+        this.connect = function () {
+            // create a new web-socket connection to the server.
+            _this.socket = new WebSocket(url);
+
+            _this.socket.onopen = function (event) {
+                onSocketOpen(event);
+            }
+
+            _this.socket.onclose = function (event) {
+                onSocketClose(event);
+            }
+
+            _this.socket.onerror = function (event) {
+                onSocketError(event);
+            }
+
+            _this.socket.onmessage = function (event) {
+                onSocketMessage(JSON.parse(event.data));
+            }
+        };
+
+        /**
+         * Invoke a remote method on the server only, without a return value.
+         * @param {any} method The name of the remote method to be invoked.
+         */
+        this.invokeOnly = function (method) {
+            var args = [];
+            // iterate through all arguments and find type/value relationships.
+            for (var i = 1; i < arguments.length; i += 2) {
+                var type = arguments[i];
+                var value = arguments[i + 1];
+                // try finding an appropriate C# type.
+                if (typemappings[type] !== undefined)
+                    type = typemappings[type];
+                // even if we can't find a C# type we assume the user knows what he's doing.
+                args.push({ $type: type, $value: value });
+            }
+
+            // send web-socket message to the server.
+            _this.socket.send(JSON.stringify(new Message(Message.MethodInvocation,
+                JSON.stringify(new InvocationDescriptor(method, args, '00000000-0000-0000-0000-000000000000'))
+            )));
+        }
+    };
+
+    return constructor;
+})();

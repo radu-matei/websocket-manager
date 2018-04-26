@@ -1,4 +1,5 @@
-﻿using System.Net.WebSockets;
+﻿using System;
+using System.Net.WebSockets;
 using System.Threading.Tasks;
 using WebSocketManager;
 using WebSocketManager.Common;
@@ -7,8 +8,9 @@ namespace ChatApplication
 {
     public class ChatHandler : WebSocketHandler
     {
-        public ChatHandler(WebSocketConnectionManager webSocketConnectionManager) : base(webSocketConnectionManager)
+        public ChatHandler(WebSocketConnectionManager webSocketConnectionManager) : base(webSocketConnectionManager, new ControllerMethodInvocationStrategy())
         {
+            ((ControllerMethodInvocationStrategy)MethodInvocationStrategy).Controller = this;
         }
 
         public override async Task OnConnected(WebSocket socket)
@@ -26,9 +28,9 @@ namespace ChatApplication
             await SendMessageToAllAsync(message);
         }
 
-        public async Task SendMessage(string socketId, string message)
+        public async Task SendMessage(WebSocket socket, string message)
         {
-            await InvokeClientMethodToAllAsync("receiveMessage", socketId, message);
+            await InvokeClientMethodToAllAsync("receiveMessage", WebSocketConnectionManager.GetId(socket), message);
         }
 
         public override async Task OnDisconnected(WebSocket socket)

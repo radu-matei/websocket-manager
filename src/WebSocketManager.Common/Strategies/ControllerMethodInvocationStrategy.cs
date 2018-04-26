@@ -18,7 +18,7 @@ namespace WebSocketManager.Common
         /// Gets the controller containing the methods.
         /// </summary>
         /// <value>The controller containing the methods.</value>
-        public object Controller { get; }
+        public object Controller { get; set; }
 
         /// <summary>
         /// Gets the method name prefix. This prevents users from calling methods they aren't
@@ -32,6 +32,13 @@ namespace WebSocketManager.Common
         /// </summary>
         /// <value><c>true</c> if there is no websocket argument; otherwise, <c>false</c>.</value>
         public bool NoWebsocketArgument { get; set; } = false;
+
+        /// <summary>
+        /// Initializes a new instance of the <see cref="ControllerMethodInvocationStrategy"/> class.
+        /// </summary>
+        public ControllerMethodInvocationStrategy()
+        {
+        }
 
         /// <summary>
         /// Initializes a new instance of the <see cref="ControllerMethodInvocationStrategy"/> class.
