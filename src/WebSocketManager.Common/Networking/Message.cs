@@ -3,8 +3,9 @@
     public enum MessageType
     {
         Text,
-        ClientMethodInvocation,
-        ConnectionEvent
+        MethodInvocation,
+        ConnectionEvent,
+        MethodReturnValue
     }
 
     public class Message

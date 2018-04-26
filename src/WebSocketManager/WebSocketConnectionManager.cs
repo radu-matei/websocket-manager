@@ -65,10 +65,12 @@ namespace WebSocketManager
 
         public async Task RemoveSocket(string id)
         {
+            if (id == null) return;
+
             WebSocket socket;
             _sockets.TryRemove(id, out socket);
-			
-			if (socket.State != WebSocketState.Open) return;
+
+            if (socket.State != WebSocketState.Open) return;
 
             await socket.CloseAsync(closeStatus: WebSocketCloseStatus.NormalClosure,
                                     statusDescription: "Closed by the WebSocketManager",
