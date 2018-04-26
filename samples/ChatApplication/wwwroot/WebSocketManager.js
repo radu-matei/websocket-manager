@@ -138,7 +138,7 @@ var WebSocketManager = (function () {
         /**
          * The waiting remote invocations for Client to Server method calls (return values).
          */
-        var waitingRemoteInvocations = [];
+        var waitingRemoteInvocations = {};
 
         ///////////////////////////////////////////////////////////////////////////////////////////
 
@@ -250,6 +250,12 @@ var WebSocketManager = (function () {
             }
 
             _this.socket.onclose = function (event) {
+                // run all the callbacks on the waiting list so the program continues.
+                Object.keys(waitingRemoteInvocations).forEach(function (guid) {
+                    waitingRemoteInvocations[guid](undefined, 'The web-socket connection was closed.');
+                });
+                waitingRemoteInvocations = {};
+
                 onSocketClose(event);
             }
 
