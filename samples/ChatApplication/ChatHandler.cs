@@ -28,9 +28,17 @@ namespace ChatApplication
             await SendMessageToAllAsync(message);
         }
 
+        // this method can be called from a client, doesn't return anything.
         public async Task SendMessage(WebSocket socket, string message)
         {
             await InvokeClientMethodToAllAsync("receiveMessage", WebSocketConnectionManager.GetId(socket), message);
+        }
+
+        // this method can be called from a client, returns the integer result or throws an exception.
+        public int DoMath(WebSocket socket, int a, int b)
+        {
+            if (a == 0 || b == 0) throw new Exception("That makes no sense.");
+            return a + b;
         }
 
         public override async Task OnDisconnected(WebSocket socket)

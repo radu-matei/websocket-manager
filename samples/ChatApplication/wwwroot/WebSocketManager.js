@@ -51,7 +51,31 @@ var WebSocketManager = (function () {
                 $type: "System.Guid",
                 $value: identifier
             };
-        }
+        };
+
+        ///////////////////////////////////////////////////////////////////////////////////////////
+
+        /**
+         * Represents the return value of a method that was executed remotely.
+         * @param {any} identifier The unique identifier of the invocation.
+         * @param {any} result The result of the method call.
+         * @param {any} exception The remote exception of the method call.
+         */
+        var InvocationResult = function (identifier, result, exception) {
+            this.$type = 'WebSocketManager.Common.InvocationResult';
+            this.result = result;
+            this.exception = exception;
+            this.identifier = {
+                $type: "System.Guid",
+                $value: identifier
+            };
+            if (exception !== undefined) {
+                this.exception = {
+                    $type: "WebSocketManager.Common.RemoteException",
+                    message: exception
+                }
+            }
+        };
 
         ///////////////////////////////////////////////////////////////////////////////////////////
 
@@ -95,6 +119,13 @@ var WebSocketManager = (function () {
                 return (c === 'x' ? r : (r & 0x3 | 0x8)).toString(16);
             });
         }
+
+        ///////////////////////////////////////////////////////////////////////////////////////////
+
+        /**
+         * The waiting remote invocations for Client to Server method calls (return values).
+         */
+        var waitingRemoteInvocations = [];
 
         ///////////////////////////////////////////////////////////////////////////////////////////
 
@@ -152,6 +183,20 @@ var WebSocketManager = (function () {
                 } else console.error("WebSocketManager: Server attempted to invoke unknown method '" + data.methodName + "'!");
             }
 
+            // METHOD RETURN VALUE EVENT
+            else if (message.messageType === Message.MethodReturnValue) {
+                var data = JSON.parse(message.data);
+                // find the waiting remote invocation.
+                var callback = waitingRemoteInvocations[data.identifier.$value];
+                // remove it from the waiting list.
+                delete waitingRemoteInvocations[data.identifier.$value];
+                // call the callback.
+                if (data.exception !== null)
+                    callback(undefined, data.exception.message);
+                else
+                    callback(data.result.$value, undefined);
+            }
+
             //console.log(message);
         };
 
@@ -201,6 +246,35 @@ var WebSocketManager = (function () {
             // send web-socket message to the server.
             _this.socket.send(JSON.stringify(new Message(Message.MethodInvocation,
                 JSON.stringify(new InvocationDescriptor(method, args, '00000000-0000-0000-0000-000000000000'))
+            )));
+        }
+
+        /**
+         * Invoke a remote method on the server, with a callback for the return value.
+         * @param {any} method The name of the remote method to be invoked.
+         */
+        this.invoke = function (method) {
+            var args = [];
+            // iterate through all arguments and find type/value relationships.
+            for (var i = 1; i < arguments.length - 1; i += 2) {
+                var type = arguments[i];
+                var value = arguments[i + 1];
+                // try finding an appropriate C# type.
+                if (typemappings[type] !== undefined)
+                    type = typemappings[type];
+                // even if we can't find a C# type we assume the user knows what he's doing.
+                args.push({ $type: type, $value: value });
+            }
+            // the last argument should be the callback method.
+            var callback = arguments[arguments.length - 1];
+            // generate a unique identifier to associate return values.
+            var guid = uuid();
+            // put this call on the waiting list.
+            waitingRemoteInvocations[guid] = callback;
+
+            // send web-socket message to the server.
+            _this.socket.send(JSON.stringify(new Message(Message.MethodInvocation,
+                JSON.stringify(new InvocationDescriptor(method, args, guid))
             )));
         }
     };

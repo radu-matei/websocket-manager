@@ -24,6 +24,13 @@
 		// called when the connection has been established together with your id.
 		connection.onConnected = (id) => {
 			appendItem(list, "-> You are now connected! Connection ID: " + connection.id);
+			
+			// let's call a method on the server with return value.
+			// if you pass 0 for either int it will cause a remote exception.
+			connection.invoke('DoMath', 'int', 5, 'int', 4, (result, error) => {
+				if (result !== undefined) console.log(result);
+				if (error !== undefined) console.error(error);
+			});
 		};
 		
 		// optional.
@@ -43,6 +50,7 @@
 			appendItem(list, userid + " said: " + text);
 		};
 		
+		// establish a connection to the server.
 		connection.connect();
 
 		var list = document.getElementById("messages");
