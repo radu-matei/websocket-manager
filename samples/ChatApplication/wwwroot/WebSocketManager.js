@@ -123,6 +123,19 @@ var WebSocketManager = (function () {
         ///////////////////////////////////////////////////////////////////////////////////////////
 
         /**
+         * Takes a C# collection of $type+$value and turns them into a simple array of values.
+         * @param {any} collection The C# collection of $type+$value.
+         */
+        var parseCSharpArguments = function (collection) {
+            var args = [];
+            for (var i = 0; i < collection.length; i++)
+                args.push(collection[i].$value);
+            return args;
+        }
+
+        ///////////////////////////////////////////////////////////////////////////////////////////
+
+        /**
          * The waiting remote invocations for Client to Server method calls (return values).
          */
         var waitingRemoteInvocations = [];
@@ -162,7 +175,7 @@ var WebSocketManager = (function () {
             // CONNECTION EVENT
             if (message.messageType === Message.ConnectionEvent) {
                 // we received the unique identifier from the server.
-                _this.id = message.data;
+                _this.id = message.data.$value;
                 // public event:
                 if (_this.onConnected !== undefined) _this.onConnected(_this.id);
             }
@@ -170,29 +183,52 @@ var WebSocketManager = (function () {
             // TEXT EVENT
             else if (message.messageType === Message.Text) {
                 // public event:
-                if (_this.onMessage !== undefined) _this.onMessage(message.data);
+                if (_this.onMessage !== undefined) _this.onMessage(message.data.$value);
             }
 
             // METHOD INVOCATION EVENT
             else if (message.messageType === Message.MethodInvocation) {
-                var data = JSON.parse(message.data);
+                var data = JSON.parse(message.data.$value);
                 // find the method.
-                if (_this.methods[data.methodName] !== undefined) {
-                    // call the method.
-                    _this.methods[data.methodName].apply(_this, data.arguments['$values']);
-                } else console.error("WebSocketManager: Server attempted to invoke unknown method '" + data.methodName + "'!");
+                if (_this.methods[data.methodName.$value] !== undefined) {
+                    // call the method and catch any exceptions.
+                    var result, error = undefined;
+                    try { result = _this.methods[data.methodName.$value].apply(_this, parseCSharpArguments(data.arguments['$values'])); }
+                    catch (e) { error = e; }
+
+                    // if the server desires a result we send a method return value.
+                    if (data.identifier.$value !== '00000000-0000-0000-0000-000000000000') {
+                        // an error occured so let the server know.
+                        if (error !== undefined) {
+                            // send web-socket message to the server.
+                            _this.socket.send(JSON.stringify(new Message(Message.MethodReturnValue,
+                                JSON.stringify(new InvocationResult(data.identifier.$value, null, "A remote exception occured: " + error))
+                            )));
+                        }
+                        // send result value to the server.
+                        else {
+                            // try finding an appropriate C# type.
+                            if (typemappings[result[0]] !== undefined)
+                                result[0] = typemappings[result[0]];
+                            // send web-socket message to the server.
+                            _this.socket.send(JSON.stringify(new Message(Message.MethodReturnValue,
+                                JSON.stringify(new InvocationResult(data.identifier.$value, { $type: result[0], $value: result[1] }))
+                            )));
+                        }
+                    }
+                } else console.error("WebSocketManager: Server attempted to invoke unknown method '" + data.methodName.$value + "'!");
             }
 
             // METHOD RETURN VALUE EVENT
             else if (message.messageType === Message.MethodReturnValue) {
-                var data = JSON.parse(message.data);
+                var data = JSON.parse(message.data.$value);
                 // find the waiting remote invocation.
                 var callback = waitingRemoteInvocations[data.identifier.$value];
                 // remove it from the waiting list.
                 delete waitingRemoteInvocations[data.identifier.$value];
                 // call the callback.
                 if (data.exception !== null)
-                    callback(undefined, data.exception.message);
+                    callback(undefined, data.exception.message.$value);
                 else
                     callback(data.result.$value, undefined);
             }

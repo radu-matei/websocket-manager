@@ -65,6 +65,8 @@ namespace WebSocketManager
 
         public async Task RemoveSocket(string id)
         {
+            if (id == null) return;
+
             WebSocket socket;
             _sockets.TryRemove(id, out socket);
 

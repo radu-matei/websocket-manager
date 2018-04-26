@@ -28,8 +28,8 @@
 			// let's call a method on the server with return value.
 			// if you pass 0 for either int it will cause a remote exception.
 			connection.invoke('DoMath', 'int', 5, 'int', 4, (result, error) => {
-				if (result !== undefined) console.log(result);
-				if (error !== undefined) console.error(error);
+				if (result !== undefined) console.log("The server's DoMath returned: " + result);
+				if (error !== undefined) console.error("The server's DoMath errored: " + error);
 			});
 		};
 		
@@ -49,6 +49,14 @@
 		connection.methods.receiveMessage = (userid, text) => {
 			appendItem(list, userid + " said: " + text);
 		};
+		
+		// here we register a method that returns a value that can be called by the server.
+		// to have the server call this type "/math" in chat.
+		connection.methods.DoMath = (a, b) => {
+			if (a == 0 || b == 0) throw "I can't help you!";
+			//throw "I won't answer lol, you have your own processor."
+			return ['int', a + b];
+		}
 		
 		// establish a connection to the server.
 		connection.connect();

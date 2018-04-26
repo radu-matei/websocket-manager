@@ -25,7 +25,7 @@ namespace WebSocketManager.Common
 
         public override bool CanConvert(Type objectType)
         {
-            return objectType.IsPrimitive || objectType == typeof(Guid);
+            return objectType.IsPrimitive || objectType == typeof(Guid) || objectType == typeof(string);
         }
 
         public override object ReadJson(JsonReader reader, Type objectType, object existingValue, JsonSerializer serializer)
