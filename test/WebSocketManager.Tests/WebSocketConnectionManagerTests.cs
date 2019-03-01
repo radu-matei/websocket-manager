@@ -43,7 +43,7 @@ namespace WebSocketManager.Tests
             [Fact]
             public void WhenEmpty_ShouldReturnZero()
             {
-                Assert.Equal(0, _manager.GetAll().Count);
+                Assert.Empty(_manager.GetAll());
             }
 
             [Fact]
@@ -51,7 +51,7 @@ namespace WebSocketManager.Tests
             {
                 _manager.AddSocket(new FakeSocket());
 
-                Assert.Equal(1, _manager.GetAll().Count);
+                Assert.Single(_manager.GetAll());
             }
         }
 
@@ -73,7 +73,7 @@ namespace WebSocketManager.Tests
                 var socketID = _manager.GetId(socket);
                 _manager.AddToGroup(socketID, GroupName);
 
-                Assert.Equal(1, _manager.GetAllFromGroup(GroupName).Count);
+                Assert.Single(_manager.GetAllFromGroup(GroupName));
             }
         }
 
@@ -114,7 +114,7 @@ namespace WebSocketManager.Tests
             {
                 _manager.AddSocket(null);
 
-                Assert.Equal(0, _manager.GetAll().Count);
+                Assert.Empty(_manager.GetAll());
             }
 
             [Fact]
@@ -122,7 +122,7 @@ namespace WebSocketManager.Tests
             {
                 _manager.AddSocket(new FakeSocket());
 
-                Assert.Equal(1, _manager.GetAll().Count);
+                Assert.Single(_manager.GetAll());
             }
         }
 
