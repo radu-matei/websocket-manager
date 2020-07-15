@@ -25,19 +25,30 @@ namespace WebSocketManager
         {
             return _sockets.FirstOrDefault(p => p.Value == socket).Key;
         }
+        
         public void AddSocket(WebSocket socket)
         {
             _sockets.TryAdd(CreateConnectionId(), socket);
         }
 
-        public async Task RemoveSocket(string id)
+        public async Task CloseAndRemoveSocket(string id)
         {
-            WebSocket socket;
-            _sockets.TryRemove(id, out socket);
+            if (_sockets.TryRemove(id, out var socket))
+            {
+                await socket.CloseOutputAsync(closeStatus: WebSocketCloseStatus.NormalClosure, 
+                    statusDescription: "Closed by the ConnectionManager", 
+                    cancellationToken: CancellationToken.None);
+            }
+        }
 
-            await socket.CloseAsync(closeStatus: WebSocketCloseStatus.NormalClosure, 
-                                    statusDescription: "Closed by the ConnectionManager", 
-                                    cancellationToken: CancellationToken.None);
+        public Task RemoveSocket(string id)
+        {
+            if (_sockets.TryRemove(id, out var socket))
+            {
+                socket.Dispose();
+            }
+
+            return Task.CompletedTask;
         }
 
         private string CreateConnectionId()

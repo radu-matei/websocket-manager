@@ -20,6 +20,11 @@ namespace WebSocketManager
             WebSocketConnectionManager.AddSocket(socket);
         }
 
+        public virtual async Task OnCloseConnection(WebSocket socket)
+        {
+            await WebSocketConnectionManager.CloseAndRemoveSocket(WebSocketConnectionManager.GetId(socket));
+        }
+
         public virtual async Task OnDisconnected(WebSocket socket)
         {
             await WebSocketConnectionManager.RemoveSocket(WebSocketConnectionManager.GetId(socket));
