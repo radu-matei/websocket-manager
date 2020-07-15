@@ -35,14 +35,7 @@ namespace WebSocketManager
                         }
                         else if(result.MessageType == WebSocketMessageType.Close)
                         {
-                            if (result.CloseStatus.HasValue && result.CloseStatus == WebSocketCloseStatus.EndpointUnavailable)
-                            {
-                                await _webSocketHandler.OnDisconnected(socket);
-                            }
-                            else
-                            {
-                                await _webSocketHandler.OnCloseConnection(socket);
-                            }
+                            await _webSocketHandler.OnCloseConnection(socket);
                         }
                     });
                 }
