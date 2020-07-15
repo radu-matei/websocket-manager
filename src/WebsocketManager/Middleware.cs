@@ -20,30 +20,40 @@ namespace WebSocketManager
 
         public async Task Invoke(HttpContext context)
         {
-            if(!context.WebSockets.IsWebSocketRequest)
-                return;
-            
-            var socket = await context.WebSockets.AcceptWebSocketAsync();
-            await _webSocketHandler.OnConnected(socket);
-            
-            await Receive(socket, async(result, buffer) =>
+            if (context.WebSockets.IsWebSocketRequest)
             {
-                if(result.MessageType == WebSocketMessageType.Text)
-                {
-                    await _webSocketHandler.ReceiveAsync(socket, result, buffer);
-                    return;
-                }
+                var socket = await context.WebSockets.AcceptWebSocketAsync();
+                await _webSocketHandler.OnConnected(socket);
 
-                else if(result.MessageType == WebSocketMessageType.Close)
+                try
                 {
-                    await _webSocketHandler.OnDisconnected(socket);
-                    return;
+                    await Receive(socket, async(result, buffer) =>
+                    {
+                        if (result.MessageType == WebSocketMessageType.Text)
+                        {
+                            await _webSocketHandler.ReceiveAsync(socket, result, buffer);
+                        }
+                        else if(result.MessageType == WebSocketMessageType.Close)
+                        {
+                            await _webSocketHandler.OnCloseConnection(socket);
+                        }
+                    });
                 }
+                catch (WebSocketException e)
+                {
+                    if (e.WebSocketErrorCode == WebSocketError.ConnectionClosedPrematurely)
+                    {
+                        await _webSocketHandler.OnDisconnected(socket);
+                        return;
+                    }
 
-            });
-            
-            //TODO - investigate the Kestrel exception thrown when this is the last middleware
-            //await _next.Invoke(context);
+                    throw;
+                }
+            }
+            else
+            {
+                await _next.Invoke(context);
+            }
         }
 
         private async Task Receive(WebSocket socket, Action<WebSocketReceiveResult, byte[]> handleMessage)
