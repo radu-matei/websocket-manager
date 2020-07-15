@@ -43,7 +43,10 @@ namespace WebSocketManager
 
         public Task RemoveSocket(string id)
         {
-            _sockets.TryRemove(id, out _);
+            if (_sockets.TryRemove(id, out var socket))
+            {
+                socket.Dispose();
+            }
 
             return Task.CompletedTask;
         }
