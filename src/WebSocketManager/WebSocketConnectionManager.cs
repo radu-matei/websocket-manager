@@ -68,8 +68,7 @@ namespace WebSocketManager
         {
             if (id == null) return;
 
-            WebSocket socket;
-            _sockets.TryRemove(id, out socket);
+            _sockets.TryRemove(id, out var socket);
 
             if (socket.State != WebSocketState.Open) return;
 
