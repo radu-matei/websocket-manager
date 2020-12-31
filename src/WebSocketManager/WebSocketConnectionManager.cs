@@ -70,7 +70,7 @@ namespace WebSocketManager
 
             _sockets.TryRemove(id, out var socket);
 
-            if (socket.State != WebSocketState.Open) return;
+            if (socket?.State != WebSocketState.Open) return;
 
             await socket.CloseAsync(closeStatus: WebSocketCloseStatus.NormalClosure,
                                     statusDescription: "Closed by the WebSocketManager",
