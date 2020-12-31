@@ -102,6 +102,11 @@ namespace WebSocketManager
                         socket.Abort();
                     }
                 }
+                catch (Exception e)
+                {
+                    await _webSocketHandler.OnDisconnected(socket);
+                    throw;
+                }
             }
 
             await _webSocketHandler.OnDisconnected(socket);
