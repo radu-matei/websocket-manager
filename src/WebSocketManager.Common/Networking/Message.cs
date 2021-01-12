@@ -5,7 +5,8 @@
         Text,
         MethodInvocation,
         ConnectionEvent,
-        MethodReturnValue
+        MethodReturnValue,
+        TextRaw,
     }
 
     public class Message

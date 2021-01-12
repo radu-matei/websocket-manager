@@ -77,7 +77,10 @@ namespace WebSocketManager
             if (socket.State != WebSocketState.Open)
                 return;
 
-            var serializedMessage = JsonConvert.SerializeObject(message, _jsonSerializerSettings);
+            var serializedMessage = message.MessageType != MessageType.TextRaw ?
+                JsonConvert.SerializeObject(message, _jsonSerializerSettings) :
+                message.Data;
+
             var encodedMessage = Encoding.UTF8.GetBytes(serializedMessage);
             await socket.SendAsync(buffer: new ArraySegment<byte>(array: encodedMessage,
                                                                   offset: 0,
